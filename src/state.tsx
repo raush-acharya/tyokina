@@ -1,0 +1,126 @@
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+
+export type Screen =
+  | 'home' | 'hub' | 'compare' | 'decide' | 'community' | 'notes' | 'review'
+  | 'saved' | 'profile' | 'how' | 'explore' | 'guide'
+export type HubTab = 'summary' | 'evidence' | 'ownership' | 'pricing' | 'community'
+export type Sheet = 'retail' | 'alert' | null
+export type Outcome = 'buy' | 'wait' | 'skip' | null
+
+const SCREENS: Screen[] = ['home', 'hub', 'compare', 'decide', 'community', 'notes', 'review', 'saved', 'profile', 'how', 'explore', 'guide']
+
+export interface AppState {
+  screen: Screen
+  prev: Screen
+  tab: HubTab
+  /** Citation number whose source is highlighted on the Evidence tab (0 = none). */
+  hl: number
+  saved: boolean
+  q: string
+  prios: string[]
+  sheet: Sheet
+  retail: string
+  alertT: number
+  alertSet: boolean
+  toast: string
+  cmp: string[]
+  showSame: boolean
+  outcome: Outcome
+  conf: number
+  feedF: string
+  voted: number[]
+  noteF: string
+  stageF: string
+  guide: number
+  picks: number[]
+  stars: number
+  rChips: string[]
+  rText: string
+  rRec: string
+  rDone: boolean
+  priv: { pub: boolean; anon: boolean; checkins: boolean }
+}
+
+function screenFromHash(): Screen {
+  const h = window.location.hash.replace(/^#\/?/, '') as Screen
+  return SCREENS.includes(h) ? h : 'home'
+}
+
+const initial = (): AppState => ({
+  screen: screenFromHash(), prev: 'home', tab: 'summary', hl: 0, saved: false, q: '',
+  prios: ['Strong noise cancellation', 'All-day battery', 'Folds flat for travel'],
+  sheet: null, retail: 'Daraz', alertT: 35000, alertSet: false, toast: '',
+  cmp: ['xm5', 'qc45', 'apm'], showSame: false, outcome: null, conf: 0,
+  feedF: 'All', voted: [], noteF: 'All', stageF: 'All', guide: 0, picks: [0, 1],
+  stars: 4, rChips: ['Battery'], rText: '', rRec: 'Yes', rDone: false,
+  priv: { pub: true, anon: false, checkins: true },
+})
+
+interface AppApi {
+  s: AppState
+  set: (patch: Partial<AppState>) => void
+  go: (screen: Screen, extra?: Partial<AppState>) => void
+  openHubTab: (tab: HubTab, highlight?: number) => void
+  toast: (msg: string) => void
+}
+
+const AppContext = createContext<AppApi | null>(null)
+
+export function AppProvider({ children }: { children: ReactNode }) {
+  const [s, setS] = useState<AppState>(initial)
+  const toastTimer = useRef<number>(undefined)
+  const hlTimer = useRef<number>(undefined)
+
+  const set = useCallback((patch: Partial<AppState>) => setS(prev => ({ ...prev, ...patch })), [])
+
+  const go = useCallback((screen: Screen, extra?: Partial<AppState>) => {
+    setS(prev => ({ ...prev, prev: prev.screen, screen, sheet: null, ...extra }))
+    window.scrollTo(0, 0)
+  }, [])
+
+  const openHubTab = useCallback((tab: HubTab, highlight = 0) => {
+    setS(prev => {
+      if (prev.screen !== 'hub') window.scrollTo(0, 0)
+      return { ...prev, prev: prev.screen === 'hub' ? prev.prev : prev.screen, screen: 'hub', tab, hl: highlight, sheet: null }
+    })
+    window.clearTimeout(hlTimer.current)
+    if (highlight) {
+      requestAnimationFrame(() => document.getElementById('source-' + highlight)?.scrollIntoView({ behavior: 'smooth', block: 'center' }))
+      hlTimer.current = window.setTimeout(() => setS(prev => ({ ...prev, hl: 0 })), 2200)
+    }
+  }, [])
+
+  const toast = useCallback((msg: string) => {
+    window.clearTimeout(toastTimer.current)
+    setS(prev => ({ ...prev, toast: msg }))
+    toastTimer.current = window.setTimeout(() => setS(prev => ({ ...prev, toast: '' })), 2600)
+  }, [])
+
+  // Keep the URL hash in step with the screen so browser back/forward work.
+  useEffect(() => {
+    if (screenFromHash() !== s.screen || !window.location.hash) {
+      const url = '#/' + s.screen
+      if (window.location.hash) history.pushState(null, '', url)
+      else history.replaceState(null, '', url)
+    }
+  }, [s.screen])
+
+  useEffect(() => {
+    const onPop = () => setS(prev => ({ ...prev, prev: prev.screen, screen: screenFromHash(), sheet: null }))
+    window.addEventListener('popstate', onPop)
+    return () => {
+      window.removeEventListener('popstate', onPop)
+      window.clearTimeout(toastTimer.current)
+      window.clearTimeout(hlTimer.current)
+    }
+  }, [])
+
+  const api = useMemo(() => ({ s, set, go, openHubTab, toast }), [s, set, go, openHubTab, toast])
+  return <AppContext.Provider value={api}>{children}</AppContext.Provider>
+}
+
+export function useApp(): AppApi {
+  const ctx = useContext(AppContext)
+  if (!ctx) throw new Error('useApp must be used inside <AppProvider>')
+  return ctx
+}
