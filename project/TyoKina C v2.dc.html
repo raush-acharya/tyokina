@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="tyokina-c-data.js"></script>
+<style>
+body{margin:0;background:#FAFAF7;color:#0C0E1A;font-family:Outfit,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#1B2D6E;text-decoration:underline;text-underline-offset:3px}a:hover{color:#B45309}
+*{box-sizing:border-box}
+input,textarea{font-family:inherit}
+@keyframes tkUp{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+</style>
+</helmet>
+<div style="min-height:100vh;background:#FAFAF7;padding-bottom:128px">
+  <header style="max-width:1200px;margin:0 auto;padding:16px clamp(16px,4vw,40px);display:flex;justify-content:space-between;align-items:center;gap:16px">
+    <span onClick="{{ goHome }}" style="font-weight:800;font-size:24px;letter-spacing:-0.04em;cursor:pointer;padding:8px 0">tyo<span style="color:#B45309">kina?</span></span>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span onClick="{{ goHow }}" style="height:44px;padding:0 16px;border-radius:999px;border:1.5px solid #E2E6F3;display:flex;align-items:center;font-size:14px;font-weight:500;cursor:pointer;color:#4A5273" style-hover="border-color:#0C0E1A;color:#0C0E1A">How it works</span>
+      <span onClick="{{ goNotes }}" style="width:44px;height:44px;border-radius:50%;border:1.5px solid #E2E6F3;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative" style-hover="border-color:#0C0E1A">
+        <span style="width:14px;height:15px;border:1.8px solid #0C0E1A;border-radius:7px 7px 3px 3px"></span>
+        <span style="position:absolute;top:7px;right:7px;min-width:16px;height:16px;border-radius:8px;background:#F59E0B;font-family:'DM Mono',monospace;font-size:10px;display:flex;align-items:center;justify-content:center;padding:0 4px">{{ unread }}</span>
+      </span>
+    </div>
+  </header>
+
+  <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+    <main data-screen-label="Home" style="max-width:1200px;margin:0 auto;padding:clamp(16px,5vw,56px) clamp(16px,4vw,40px) 0">
+      <h1 style="font-weight:700;font-size:clamp(52px,10vw,140px);line-height:0.88;letter-spacing:-0.06em;margin:0">What are<br>you buying<span style="color:#F59E0B">?</span></h1>
+      <div style="display:flex;gap:12px;align-items:center;margin-top:clamp(24px,4vw,44px);border-bottom:3px solid #0C0E1A;padding-bottom:10px;max-width:820px">
+        <input value="{{ q }}" onChange="{{ setQ }}" placeholder="Search products, brands or guides" aria-label="Search" style="flex:1;min-width:0;border:0;outline:0;background:transparent;font-size:clamp(22px,3vw,32px);font-weight:500;color:#0C0E1A;letter-spacing:-0.02em">
+        <span onClick="{{ clearQ }}" style="width:56px;height:56px;border-radius:50%;background:#0C0E1A;color:#FAFAF7;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;flex-shrink:0;transition:transform .2s" style-hover="background:#F59E0B;color:#0C0E1A">{{ qIcon }}</span>
+      </div>
+
+      <sc-if value="{{ hasQ }}" hint-placeholder-val="{{ false }}">
+        <div style="max-width:820px;margin-top:20px;animation:tkUp .3s ease">
+          <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.1em;color:#6B7599;padding:8px 0">PRODUCTS · {{ resultCount }}</div>
+          <sc-for list="{{ results }}" as="r" hint-placeholder-count="3">
+            <div onClick="{{ goHub }}" style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 0;border-top:1.5px solid #E2E6F3;cursor:pointer;min-height:56px" style-hover="padding-left:8px">
+              <div><div style="font-size:20px;font-weight:600;letter-spacing:-0.02em">{{ r.brand }} {{ r.name }}</div><div style="font-size:14px;color:#6B7599">{{ r.cat }} · {{ r.note }}</div></div>
+              <div style="text-align:right;font-family:'DM Mono',monospace"><div style="font-size:16px">रू {{ r.price }}</div><div style="font-size:12px;color:#00796B">evidence {{ r.score }}</div></div>
+            </div>
+          </sc-for>
+          <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.1em;color:#6B7599;padding:20px 0 8px">BUYING GUIDES</div>
+          <sc-for list="{{ resultGuides }}" as="g" hint-placeholder-count="1">
+            <div onClick="{{ g.go }}" style="padding:16px 0;border-top:1.5px solid #E2E6F3;cursor:pointer;font-size:18px;font-weight:500">{{ g.t }} <span style="font-size:14px;color:#6B7599;font-weight:400">· {{ g.meta }}</span></div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ noQ }}" hint-placeholder-val="{{ true }}">
+        <section style="margin-top:48px">
+          <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.1em;color:#6B7599;margin-bottom:14px">PICK UP WHERE YOU LEFT OFF</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px">
+            <sc-for list="{{ continueR }}" as="c" hint-placeholder-count="2">
+              <div onClick="{{ c.go }}" style="border-radius:28px;padding:24px;background:#fff;border:2px solid #0C0E1A;cursor:pointer;display:flex;flex-direction:column;gap:14px;transition:transform .25s" style-hover="transform:translateY(-4px)">
+                <div style="display:flex;justify-content:space-between;gap:12px"><span style="font-family:'DM Mono',monospace;font-size:12px;padding:5px 10px;border-radius:999px;background:{{ c.bg }}">{{ c.stage }}</span><span style="font-size:22px">→</span></div>
+                <div style="font-size:26px;font-weight:700;letter-spacing:-0.03em">{{ c.name }}</div>
+                <div><div style="height:8px;border-radius:4px;background:#EEF0F9"><div style="height:8px;border-radius:4px;background:#0C0E1A;width:{{ c.w }}"></div></div><div style="font-size:14px;color:#4A5273;margin-top:8px">{{ c.step }}</div></div>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <section style="margin-top:48px">
+          <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.1em;color:#6B7599;margin-bottom:14px">WHAT MATTERS MOST TO YOU? · WE CHECK EVERY PRODUCT AGAINST IT</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <sc-for list="{{ prioOpts }}" as="o" hint-placeholder-count="7">
+              <span onClick="{{ o.toggle }}" style="min-height:48px;padding:0 20px;display:flex;align-items:center;border-radius:999px;font-size:17px;font-weight:500;cursor:pointer;border:2px solid #0C0E1A;background:{{ o.bg }};color:{{ o.fg }};transition:all .15s">{{ o.mark }}{{ o.t }}</span>
+            </sc-for>
+          </div>
+        </section>
+
+        <section style="margin-top:56px;border-radius:36px;background:#F59E0B;padding:clamp(24px,4vw,44px)">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap"><div style="font-size:clamp(30px,4vw,48px);font-weight:700;letter-spacing:-0.04em">Price drops worth knowing</div><span style="font-family:'DM Mono',monospace;font-size:12px">VS 12-MONTH HISTORY</span></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px;margin-top:20px">
+            <sc-for list="{{ drops }}" as="d" hint-placeholder-count="3">
+              <div onClick="{{ goHub }}" style="border-radius:24px;background:#FAFAF7;padding:20px;cursor:pointer" style-hover="background:#fff">
+                <div style="font-size:18px;font-weight:600">{{ d.name }}</div>
+                <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:10px;gap:8px;flex-wrap:wrap"><span style="font-family:'DM Mono',monospace;font-size:20px">रू {{ d.price }}</span><span style="font-family:'DM Mono',monospace;font-size:13px;color:#00796B">{{ d.d }}</span></div>
+                <div style="font-size:14px;color:#4A5273;margin-top:4px">{{ d.note }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <section style="margin-top:56px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:16px"><div style="font-size:clamp(30px,4vw,48px);font-weight:700;letter-spacing:-0.04em">Trending research</div><span onClick="{{ goExplore }}" style="font-size:16px;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:4px;padding:10px 0">Explore categories & guides →</span></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:16px">
+            <sc-for list="{{ trending }}" as="t" hint-placeholder-count="4">
+              <div onClick="{{ goHub }}" style="border-radius:28px;padding:24px;cursor:pointer;background:{{ t.bg }};color:{{ t.fg }};min-height:230px;display:flex;flex-direction:column;justify-content:space-between;transition:transform .25s" style-hover="transform:translateY(-6px) rotate(-1deg)">
+                <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.04em"><span>{{ t.cat }}</span><span>रू {{ t.price }}</span></div>
+                <div><div style="font-size:56px;font-weight:700;letter-spacing:-0.05em;line-height:1">{{ t.score }}</div><div style="font-size:22px;font-weight:600;letter-spacing:-0.02em;margin-top:6px">{{ t.brand }} {{ t.name }}</div><div style="font-size:14px;margin-top:4px">{{ t.note }}</div></div>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+      </sc-if>
+    </main>
+  </sc-if>
+
+  <sc-if value="{{ isHub }}" hint-placeholder-val="{{ false }}">
+    <main data-screen-label="Research Hub" style="max-width:1200px;margin:0 auto;padding:clamp(8px,2vw,24px) clamp(16px,4vw,40px) 0">
+      <span onClick="{{ goBack }}" style="display:inline-flex;align-items:center;min-height:44px;font-family:'DM Mono',monospace;font-size:13px;color:#4A5273;cursor:pointer">← Back</span>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:24px;align-items:end;margin-top:8px">
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.1em;color:#4A5273">SONY · OVER-EAR HEADPHONES · ★ 4.7 (2,847)</div>
+          <h1 style="font-weight:700;font-size:clamp(48px,8vw,108px);line-height:0.9;letter-spacing:-0.06em;margin:12px 0 0">WH-1000XM5</h1>
+          <div style="display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;margin-top:16px;font-family:'DM Mono',monospace"><span style="font-size:26px">रू 37,000</span><span style="font-size:15px;color:#6B7599;text-decoration:line-through">रू 46,000</span><span style="font-size:13px;padding:4px 10px;border-radius:999px;background:#D9F7F2;color:#00695C">−20% vs 12-mo high</span></div>
+        </div>
+        <div style="border-radius:28px;height:220px;background:repeating-linear-gradient(135deg,#ECEBE4 0 10px,#F3F2EC 10px 20px);display:flex;align-items:flex-end;padding:16px"><span style="font-family:'DM Mono',monospace;font-size:12px;color:#4A5273;background:#FAFAF7;padding:5px 10px;border-radius:6px">product shot</span></div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:24px">
+        <span onClick="{{ openRetail }}" style="min-height:48px;padding:0 24px;display:flex;align-items:center;border-radius:999px;background:#0C0E1A;color:#FAFAF7;font-weight:600;font-size:16px;cursor:pointer" style-hover="background:#1B2D6E">See prices</span>
+        <span onClick="{{ goDecide }}" style="min-height:48px;padding:0 24px;display:flex;align-items:center;border-radius:999px;background:#F59E0B;font-weight:600;font-size:16px;cursor:pointer" style-hover="background:#FBBF24">Ready to decide?</span>
+        <span onClick="{{ goCompare }}" style="min-height:48px;padding:0 24px;display:flex;align-items:center;border-radius:999px;border:2px solid #0C0E1A;font-weight:600;font-size:16px;cursor:pointer" style-hover="background:#fff">Compare</span>
+        <span onClick="{{ toggleSave }}" style="min-height:48px;padding:0 24px;display:flex;align-items:center;border-radius:999px;border:2px solid #E2E6F3;font-weight:500;font-size:16px;cursor:pointer;color:#4A5273" style-hover="border-color:#0C0E1A">{{ saveLabel }}</span>
+      </div>
+
+      <sc-if value="{{ longform }}" hint-placeholder-val="{{ false }}"><div style="margin-top:48px;border-top:2px solid #0C0E1A;padding-top:16px;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.1em;color:#4A5273">THE FULL DOSSIER · SCROLL TO READ</div></sc-if>
+      <sc-if value="{{ chaptered }}" hint-placeholder-val="{{ true }}">
+      <div style="position:sticky;top:0;z-index:5;background:#FAFAF7;margin-top:48px;padding:16px 0 14px;border-top:2px solid #0C0E1A">
+        <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.1em;color:#4A5273;margin-bottom:12px">{{ chapterKicker }}</div>
+        <div style="display:flex;gap:4px;overflow-x:auto;padding:5px;border-radius:999px;background:#EEF0F9;width:max-content;max-width:100%">
+          <sc-for list="{{ chapters }}" as="c" hint-placeholder-count="5">
+            <span onClick="{{ c.go }}" style="min-height:44px;padding:0 18px;display:flex;align-items:center;gap:8px;white-space:nowrap;border-radius:999px;font-size:15px;font-weight:500;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};transition:background .2s"><span style="font-family:'DM Mono',monospace;font-size:12px;opacity:0.7">{{ c.n }}</span>{{ c.q }}</span>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ tSummary }}" hint-placeholder-val="{{ true }}">
+        <section style="border-radius:36px;background:#1B2D6E;color:#fff;padding:clamp(28px,5vw,60px);margin-top:12px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:clamp(24px,4vw,56px);align-items:center">
+            <div>
+              <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.1em;color:#FBBF24">EVIDENCE SCORE</div>
+              <div style="font-size:clamp(120px,17vw,220px);font-weight:700;letter-spacing:-0.07em;line-height:0.8;margin-top:16px">8.9</div>
+              <div style="font-size:17px;color:#DCE0F5;margin-top:14px">Based on {{ p.basis }}</div>
+              <span onClick="{{ goHow }}" style="display:inline-block;font-size:14px;color:#fff;text-decoration:underline;text-underline-offset:3px;margin-top:6px;cursor:pointer;padding:8px 0">How is this scored?</span>
+            </div>
+            <div>
+              <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.1em;color:#DCE0F5">AI SUMMARY · BUILT ONLY FROM CITED SOURCES</div>
+              <p style="font-size:clamp(21px,2.3vw,30px);line-height:1.38;letter-spacing:-0.01em;margin:14px 0 0;text-wrap:pretty">
+                <sc-for list="{{ summarySegs }}" as="s" hint-placeholder-count="4"><span>{{ s.t }}</span><sc-for list="{{ s.cites }}" as="c" hint-placeholder-count="1"><span onClick="{{ c.go }}" title="Open source" style="display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;margin:0 2px;padding:0 5px;border-radius:6px;background:#FBBF24;color:#0C0E1A;font-family:'DM Mono',monospace;font-size:13px;vertical-align:4px;cursor:pointer">{{ c.n }}</span></sc-for></sc-for>
+              </p>
+              <span onClick="{{ flagError }}" style="display:inline-block;font-size:14px;color:#DCE0F5;margin-top:14px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:8px 0">Spot an error? Flag it</span>
+            </div>
+          </div>
+        </section>
+        <div style="border-radius:32px;background:#fff;border:2px solid #0C0E1A;padding:clamp(20px,3vw,32px);margin-top:16px">
+          <div style="font-size:24px;font-weight:700;letter-spacing:-0.03em">Where sources agree — and don't</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px;margin-top:16px">
+            <sc-for list="{{ consensus }}" as="c" hint-placeholder-count="3">
+              <div style="border-radius:20px;padding:18px;background:{{ c.bg }}"><div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.06em">{{ c.label }}</div><div style="font-size:19px;font-weight:600;margin-top:6px">{{ c.t }}</div><div style="font-size:15px;color:#2A3050;margin-top:4px;line-height:1.4">{{ c.agree }}</div></div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:16px;margin-top:16px">
+          <div style="border-radius:36px;background:#D9F7F2;padding:clamp(24px,4vw,40px)">
+            <div style="font-size:clamp(28px,3vw,38px);font-weight:700;letter-spacing:-0.04em">What works well</div>
+            <sc-for list="{{ works }}" as="w" hint-placeholder-count="5"><div style="display:flex;justify-content:space-between;gap:12px;font-size:18px;padding:12px 0;border-bottom:1.5px solid rgba(0,105,92,0.2)"><span>{{ w.t }}</span><span style="font-family:'DM Mono',monospace;font-size:13px;color:#00695C;white-space:nowrap">[{{ w.c }}]</span></div></sc-for>
+          </div>
+          <div style="border-radius:36px;background:#FEF3C7;padding:clamp(24px,4vw,40px)">
+            <div style="font-size:clamp(28px,3vw,38px);font-weight:700;letter-spacing:-0.04em">Trade-offs</div>
+            <sc-for list="{{ tradeoffs }}" as="w" hint-placeholder-count="4"><div style="display:flex;justify-content:space-between;gap:12px;font-size:18px;padding:12px 0;border-bottom:1.5px solid rgba(180,83,9,0.2)"><span>{{ w.t }}</span><span style="font-family:'DM Mono',monospace;font-size:13px;color:#92400E;white-space:nowrap">[{{ w.c }}]</span></div></sc-for>
+            <div style="font-size:15px;font-weight:600;margin-top:20px">Best for</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><sc-for list="{{ p.bestFor }}" as="b" hint-placeholder-count="3"><span style="padding:8px 14px;border-radius:999px;background:#0C0E1A;color:#FAFAF7;font-size:14px">{{ b }}</span></sc-for></div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ tEvidence }}" hint-placeholder-val="{{ false }}">
+        <h2 style="font-size:clamp(36px,5vw,60px);font-weight:700;letter-spacing:-0.05em;margin:28px 0 8px">Who says so?</h2>
+        <p style="font-size:18px;color:#4A5273;margin:0 0 20px;max-width:640px;line-height:1.45">Sources are scored for independence, method and track record. Affiliate-only sites are excluded; any commercial tie is flagged.</p>
+        <sc-for list="{{ sources }}" as="s" hint-placeholder-count="4">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px 32px;padding:24px;border-radius:28px;margin-bottom:12px;align-items:start;background:{{ s.bg }};border:2px solid {{ s.bd }};transition:background .4s">
+            <div><div style="display:flex;gap:10px;align-items:center"><span style="width:28px;height:28px;border-radius:8px;background:#FBBF24;font-family:'DM Mono',monospace;font-size:14px;display:flex;align-items:center;justify-content:center">{{ s.n }}</span><span style="font-size:24px;font-weight:700;letter-spacing:-0.03em">{{ s.outlet }}</span></div><div style="font-family:'DM Mono',monospace;font-size:13px;color:#4A5273;margin-top:8px">{{ s.score }} · {{ s.date }} · {{ s.fund }}</div>
+              <sc-if value="{{ s.hasFlag }}" hint-placeholder-val="{{ false }}"><div style="display:inline-block;margin-top:10px;font-family:'DM Mono',monospace;font-size:12px;padding:5px 10px;border-radius:999px;background:#FDE2E2;color:#991B1B">⚑ {{ s.flag }}</div></sc-if>
+            </div>
+            <p style="grid-column:span 2;min-width:0;font-size:19px;line-height:1.5;margin:0">“{{ s.quote }}” <a href="#">Read original ↗</a></p>
+            <div style="display:flex;align-items:center;gap:12px"><div style="width:72px;height:72px;border-radius:50%;background:conic-gradient({{ s.ring }} 0 {{ s.w }},#E2E6F3 {{ s.w }} 100%);display:flex;align-items:center;justify-content:center"><div style="width:56px;height:56px;border-radius:50%;background:#FAFAF7;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:16px">{{ s.trust }}</div></div><span style="font-size:14px;color:#4A5273">source<br>trust</span></div>
+          </div>
+        </sc-for>
+      </sc-if>
+
+      <sc-if value="{{ tOwnership }}" hint-placeholder-val="{{ false }}">
+        <h2 style="font-size:clamp(36px,5vw,60px);font-weight:700;letter-spacing:-0.05em;margin:28px 0 20px">Will it last?</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px">
+          <sc-for list="{{ ownStats }}" as="o" hint-placeholder-count="3">
+            <div style="border-radius:32px;padding:28px;background:{{ o.bg }};color:{{ o.fg }}"><div style="font-size:72px;font-weight:700;letter-spacing:-0.06em;line-height:1">{{ o.v }}<span style="font-size:28px">{{ o.u }}</span></div><div style="font-size:18px;font-weight:600;margin-top:10px">{{ o.k }}</div><div style="font-family:'DM Mono',monospace;font-size:12px;margin-top:4px">{{ o.n }}</div></div>
+          </sc-for>
+        </div>
+        <div style="border-radius:32px;background:#fff;border:2px solid #0C0E1A;padding:clamp(20px,3vw,32px);margin-top:16px">
+          <div style="font-size:24px;font-weight:700;letter-spacing:-0.03em">Recurring issues after 1+ year</div>
+          <sc-for list="{{ issues }}" as="i" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 0;border-bottom:1.5px solid #EEF0F9;font-size:18px"><span>{{ i.t }} <span style="font-family:'DM Mono',monospace;font-size:13px;color:#4A5273">· {{ i.n }} reports</span></span><span style="font-family:'DM Mono',monospace;font-size:13px;padding:4px 10px;border-radius:999px;background:{{ i.bg }}">{{ i.s }}</span></div></sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:16px;margin-top:16px">
+          <sc-for list="{{ owners }}" as="o" hint-placeholder-count="2">
+            <div style="border-radius:32px;padding:28px;background:#EEF0F9"><p style="font-size:20px;line-height:1.45;margin:0;letter-spacing:-0.01em">“{{ o.text }}”</p><div style="display:flex;gap:10px;align-items:center;margin-top:16px;font-size:14px"><span style="width:36px;height:36px;border-radius:50%;background:#1B2D6E;color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center">{{ o.i }}</span><b>{{ o.name }}</b> · {{ o.time }} · <span style="color:#00695C">✓ Verified</span></div></div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ tPricing }}" hint-placeholder-val="{{ false }}">
+        <section style="border-radius:36px;background:#F59E0B;padding:clamp(28px,5vw,56px);margin-top:12px">
+          <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.1em">IS NOW THE TIME? · SIGNAL: {{ pr.signal }}</div>
+          <div style="font-size:clamp(48px,8vw,100px);font-weight:700;letter-spacing:-0.06em;line-height:0.9;margin-top:12px">Yes, mostly.</div>
+          <p style="font-size:clamp(18px,2vw,23px);max-width:640px;line-height:1.4;margin:16px 0 0">रू 9,000 under its 12-month high. The all-time low was रू {{ pr.low }} during {{ pr.lowWhen }} — it may dip again.</p>
+          <div style="display:flex;align-items:flex-end;gap:8px;height:160px;margin-top:28px">
+            <sc-for list="{{ bars }}" as="b" hint-placeholder-count="12"><div style="flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;gap:6px;align-items:center"><span style="width:100%;border-radius:10px 10px 4px 4px;background:{{ b.c }};height:{{ b.h }}"></span><span style="font-family:'DM Mono',monospace;font-size:11px">{{ b.m }}</span></div></sc-for>
+          </div>
+          <div style="display:flex;gap:24px;flex-wrap:wrap;margin-top:20px;font-family:'DM Mono',monospace;font-size:14px"><span>All-time low · रू {{ pr.low }}</span><span>All-time high · रू {{ pr.high }}</span><span>Today · रू 37,000</span></div>
+        </section>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px;margin-top:16px">
+          <sc-for list="{{ retailers }}" as="r" hint-placeholder-count="4">
+            <div style="border-radius:24px;padding:22px;background:#fff;border:2px solid #E2E6F3;display:flex;flex-direction:column;gap:8px"><div style="font-size:20px;font-weight:600">{{ r.name }}</div><div style="font-family:'DM Mono',monospace;font-size:22px">रू {{ r.price }}</div><div style="font-size:14px;color:#4A5273">{{ r.stock }}</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:#4A5273">{{ r.affLabel }}</div><span onClick="{{ openRetail }}" style="margin-top:6px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;border:2px solid #0C0E1A;font-weight:600;cursor:pointer" style-hover="background:#0C0E1A;color:#FAFAF7">Visit {{ r.name }} ↗</span></div>
+          </sc-for>
+        </div>
+        <div onClick="{{ openAlert }}" style="margin-top:16px;border-radius:28px;background:#0C0E1A;color:#FAFAF7;padding:24px 28px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;cursor:pointer" style-hover="background:#1B2D6E"><div><div style="font-size:22px;font-weight:700">{{ alertTitle }}</div><div style="font-size:15px;color:#C9CEEA;margin-top:4px">We'll tell you when it hits your price. No other emails.</div></div><span style="font-size:26px">→</span></div>
+      </sc-if>
+
+      <sc-if value="{{ tCommunity }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin:28px 0 20px"><h2 style="font-size:clamp(36px,5vw,60px);font-weight:700;letter-spacing:-0.05em;margin:0">What do owners say?</h2><span onClick="{{ goReview }}" style="min-height:48px;padding:0 22px;display:flex;align-items:center;border-radius:999px;border:2px solid #0C0E1A;font-weight:600;cursor:pointer" style-hover="background:#fff">Own one? Write a review</span></div>
+        <div style="columns:3 300px;column-gap:16px">
+          <sc-for list="{{ reviews }}" as="c" hint-placeholder-count="3">
+            <div style="break-inside:avoid;margin-bottom:16px;border-radius:28px;padding:26px;background:#fff;border:2px solid #0C0E1A">
+              <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-family:'DM Mono',monospace;font-size:12px"><span style="color:{{ c.kc }}">{{ c.badge }}</span><span style="color:#4A5273">{{ c.owned }}</span></div>
+              <div style="font-size:23px;font-weight:700;letter-spacing:-0.03em;margin-top:10px;line-height:1.15">{{ c.title }}</div>
+              <p style="font-size:17px;line-height:1.5;color:#2A3050;margin:10px 0 0">{{ c.text }}</p>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:14px;color:#4A5273;gap:8px;flex-wrap:wrap"><span>{{ c.name }} · {{ c.updated }}</span><span style="font-family:'DM Mono',monospace">▲ {{ c.helpful }}</span></div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </main>
+  </sc-if>
+
+  <sc-if value="{{ isCompare }}" hint-placeholder-val="{{ false }}">
+    <main data-screen-label="Compare" style="max-width:1200px;margin:0 auto;padding:clamp(8px,2vw,24px) clamp(16px,4vw,40px) 0" data-comment-anchor="e4124a7957-main">
+      <h1 style="font-weight:700;font-size:clamp(48px,8vw,108px);line-height:0.9;letter-spacing:-0.06em;margin:0">Which one<br>suits <span style="color:#B45309">you?</span></h1>
+      <p style="font-size:19px;color:#4A5273;max-width:620px;margin:20px 0 0;line-height:1.45">No winners, no “recommended”. Each one suits a different buyer — only the differences are shown.</p>
+      <div style="overflow-x:auto;margin-top:36px;padding-bottom:4px">
+        <div style="min-width:640px">
+          <div style="display:grid;grid-template-columns:160px minmax(0,1fr);gap:12px">
+            <span></span>
+            <div style="display:grid;grid-template-columns:{{ cols }};gap:12px">
+              <sc-for list="{{ cmpCols }}" as="c" hint-placeholder-count="3">
+                <div style="border-radius:28px;padding:22px;background:{{ c.bg }};color:{{ c.fg }};display:flex;flex-direction:column;gap:12px;min-height:250px">
+                  <div style="display:flex;justify-content:space-between;align-items:center;font-family:'DM Mono',monospace;font-size:12px"><span>{{ c.brand }}</span><span onClick="{{ c.remove }}" aria-label="Remove" style="width:36px;height:36px;border-radius:50%;border:1.5px solid {{ c.line }};display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px">×</span></div>
+                  <div style="font-size:30px;font-weight:700;letter-spacing:-0.04em;line-height:1">{{ c.name }}</div>
+                  <div style="font-size:16px;line-height:1.4">Suits: {{ c.fit }}</div>
+                  <span onClick="{{ c.open }}" style="margin-top:auto;font-size:14px;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:6px 0">Open Research Hub →</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <sc-for list="{{ specGroups }}" as="gr" hint-placeholder-count="4">
+            <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.1em;color:#4A5273;margin:28px 0 6px">{{ gr.g }}</div>
+            <sc-for list="{{ gr.rows }}" as="r" hint-placeholder-count="3">
+              <div style="display:grid;grid-template-columns:160px minmax(0,1fr);gap:12px;border-top:1.5px solid #E2E6F3;padding:14px 0" style-hover="background:#F3F2EC">
+                <span style="font-size:16px;color:#2A3050">{{ r.k }}</span>
+                <div style="display:grid;grid-template-columns:{{ cols }};gap:12px"><sc-for list="{{ r.cells }}" as="v" hint-placeholder-count="3"><span style="justify-self:start;display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:4px 12px;border-radius:999px;font-family:'DM Mono',monospace;font-size:17px;background:{{ v.bg }};font-weight:{{ v.fw }}">{{ v.mark }}{{ v.v }}</span></sc-for></div>
+              </div>
+            </sc-for>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:20px">
+        <span style="min-height:44px;display:flex;align-items:center;gap:8px;font-size:15px;color:#2A3050;margin-right:8px"><span style="width:16px;height:16px;border-radius:50%;background:#FBBF24"></span>Best in that row</span><span onClick="{{ toggleSame }}" style="min-height:44px;padding:0 18px;display:flex;align-items:center;border-radius:999px;border:1.5px solid #0C0E1A;font-size:15px;cursor:pointer" style-hover="background:#fff">{{ showSameLabel }}</span>
+        <sc-if value="{{ canAdd }}" hint-placeholder-val="{{ false }}"><span onClick="{{ addProduct }}" style="min-height:44px;padding:0 18px;display:flex;align-items:center;border-radius:999px;border:1.5px dashed #0C0E1A;font-size:15px;cursor:pointer">+ Add a product</span></sc-if>
+      </div>
+      <section style="border-radius:36px;background:#1B2D6E;color:#fff;padding:clamp(24px,4vw,44px);margin-top:28px">
+        <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.1em;color:#FBBF24">TRADE-OFFS IN PLAIN LANGUAGE</div>
+        <p style="font-size:clamp(21px,2.4vw,30px);line-height:1.35;letter-spacing:-0.01em;margin:12px 0 0;text-wrap:pretty">{{ tradeSummary }}</p>
+      </section>
+      <div style="display:flex;justify-content:center;margin-top:28px"><span onClick="{{ goDecide }}" style="min-height:60px;padding:0 32px;display:flex;align-items:center;border-radius:999px;background:#0C0E1A;color:#FAFAF7;font-size:18px;font-weight:600;cursor:pointer" style-hover="background:#1B2D6E">Leaning Sony? Check the evidence →</span></div>
+    </main>
+  </sc-if>
+
+  <sc-if value="{{ isDecide }}" hint-placeholder-val="{{ false }}">
+    <main data-screen-label="Decision check" style="max-width:960px;margin:0 auto;padding:clamp(8px,2vw,24px) clamp(16px,4vw,40px) 0">
+      <span onClick="{{ goHub }}" style="display:inline-flex;align-items:center;min-height:44px;font-family:'DM Mono',monospace;font-size:13px;color:#4A5273;cursor:pointer">← Back to Research Hub</span>
+      <h1 style="font-weight:700;font-size:clamp(48px,8vw,100px);line-height:0.9;letter-spacing:-0.06em;margin:8px 0 0">Ready to<br>decide<span style="color:#F59E0B">?</span></h1>
+      <p style="font-size:18px;color:#4A5273;margin:16px 0 0">Sony WH-1000XM5 · रू 37,000 — a check of the evidence, and what's still unknown.</p>
+      <div style="border-radius:36px;background:#0C0E1A;color:#FAFAF7;padding:clamp(24px,5vw,44px);margin-top:28px">
+        <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.1em;color:#FBBF24">AGAINST YOUR PRIORITIES</div>
+        <sc-for list="{{ myPrios }}" as="p" hint-placeholder-count="3">
+          <div style="display:flex;gap:16px;align-items:center;padding:16px 0;border-bottom:1px solid #2A3050;font-size:clamp(20px,2.4vw,27px);font-weight:500;letter-spacing:-0.02em"><span style="width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;background:{{ p.bg }};color:#0C0E1A">{{ p.icon }}</span><span style="flex:1">{{ p.t }}</span><span style="font-family:'DM Mono',monospace;font-size:13px;color:#C9CEEA">{{ p.note }}</span></div>
+        </sc-for>
+        <sc-if value="{{ noPrios }}" hint-placeholder-val="{{ false }}"><div style="font-size:18px;padding:16px 0">No priorities set yet.</div></sc-if>
+        <span onClick="{{ goHome }}" style="display:inline-block;font-size:15px;color:#FBBF24;margin-top:12px;cursor:pointer;text-decoration:underline;padding:8px 0">Edit priorities</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:16px;margin-top:16px">
+        <div style="border-radius:32px;background:#fff;border:2px solid #0C0E1A;padding:28px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="font-size:24px;font-weight:700;letter-spacing:-0.03em">Evidence coverage</span><span style="font-family:'DM Mono',monospace;font-size:12px;padding:4px 10px;border-radius:999px;background:#D9F7F2;color:#00695C">STRONG</span></div>
+          <sc-for list="{{ coverage }}" as="c" hint-placeholder-count="4"><div style="margin-top:16px"><div style="display:flex;justify-content:space-between;font-size:15px;gap:8px"><span>{{ c.k }}</span><span style="font-family:'DM Mono',monospace;font-size:12px;color:#4A5273">{{ c.d }}</span></div><div style="display:flex;gap:4px;margin-top:8px"><sc-for list="{{ c.segs }}" as="sg" hint-placeholder-count="5"><span style="flex:1;height:10px;border-radius:5px;background:{{ sg }}"></span></sc-for></div></div></sc-for>
+        </div>
+        <div style="border-radius:32px;background:#FEF3C7;padding:28px;display:flex;flex-direction:column;gap:10px">
+          <div style="font-size:24px;font-weight:700;letter-spacing:-0.03em">Still uncertain</div>
+          <sc-for list="{{ uncertain }}" as="u" hint-placeholder-count="2"><div style="font-size:17px;line-height:1.5;padding-left:16px;border-left:3px solid #F59E0B">{{ u }}</div></sc-for>
+          <div style="font-size:24px;font-weight:700;letter-spacing:-0.03em;margin-top:12px">Price timing</div>
+          <div style="font-size:17px;line-height:1.5">{{ timing }}</div>
+        </div>
+      </div>
+      <sc-if value="{{ noOutcome }}" hint-placeholder-val="{{ true }}">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:12px;margin-top:24px">
+          <span onClick="{{ chooseRetailer }}" style="min-height:64px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:#0C0E1A;color:#FAFAF7;font-size:18px;font-weight:600;cursor:pointer" style-hover="background:#1B2D6E">Choose a retailer</span>
+          <span onClick="{{ saveAlert }}" style="min-height:64px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:#0C0E1A;color:#FAFAF7;font-size:18px;font-weight:600;cursor:pointer" style-hover="background:#1B2D6E">Save & set price alert</span>
+        </div>
+        <div style="text-align:center;margin-top:12px"><span onClick="{{ notBuying }}" style="display:inline-block;font-size:16px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:12px">I've decided not to buy</span></div>
+      </sc-if>
+      <sc-if value="{{ hasOutcome }}" hint-placeholder-val="{{ false }}">
+        <div style="border-radius:32px;background:#D9F7F2;padding:clamp(24px,4vw,36px);margin-top:24px;animation:tkUp .3s ease">
+          <div style="font-size:clamp(26px,3vw,36px);font-weight:700;letter-spacing:-0.04em">{{ outcomeText }}</div>
+          <div style="font-size:17px;margin-top:16px">How confident do you feel about this decision?</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+            <sc-for list="{{ confOpts }}" as="o" hint-placeholder-count="7"><span onClick="{{ o.go }}" style="width:48px;height:48px;border-radius:50%;border:2px solid #0C0E1A;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:17px;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.n }}</span></sc-for>
+          </div>
+          <div style="display:flex;justify-content:space-between;max-width:384px;font-size:13px;color:#2A3050;margin-top:6px"><span>Not at all</span><span>Completely</span></div>
+          <span onClick="{{ resetOutcome }}" style="display:inline-block;font-size:15px;margin-top:16px;cursor:pointer;text-decoration:underline;padding:8px 0">Change my decision</span>
+        </div>
+      </sc-if>
+      <p style="text-align:center;font-size:17px;color:#4A5273;margin-top:16px">Waiting is a valid answer. Your research is saved.</p>
+    </main>
+  </sc-if>
+
+  <sc-if value="{{ isCommunity }}" hint-placeholder-val="{{ false }}">
+    <main data-screen-label="Community" style="max-width:1200px;margin:0 auto;padding:clamp(8px,2vw,24px) clamp(16px,4vw,40px) 0">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+        <h1 style="font-weight:700;font-size:clamp(48px,8vw,108px);line-height:0.9;letter-spacing:-0.06em;margin:0">Owners,<br>not <span style="color:#B45309">ambassadors.</span></h1>
+        <span onClick="{{ goReview }}" style="min-height:52px;padding:0 24px;display:flex;align-items:center;border-radius:999px;background:#0C0E1A;color:#FAFAF7;font-weight:600;font-size:16px;cursor:pointer" style-hover="background:#1B2D6E">Share your experience</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:28px">
+        <sc-for list="{{ feedFilters }}" as="f" hint-placeholder-count="4"><span onClick="{{ f.go }}" style="min-height:44px;padding:0 18px;display:flex;align-items:center;border-radius:999px;border:1.5px solid #0C0E1A;font-size:15px;font-weight:500;cursor:pointer;background:{{ f.bg }};color:{{ f.fg }}">{{ f.t }}</span></sc-for>
+      </div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:20px;align-items:flex-start">
+        <div style="flex:999 1 520px;min-width:0;display:grid;gap:16px">
+          <sc-for list="{{ feed }}" as="f" hint-placeholder-count="4">
+            <div style="border-radius:28px;padding:clamp(20px,3vw,28px);background:#fff;border:2px solid #0C0E1A">
+              <div style="display:flex;gap:12px;align-items:center"><span style="width:44px;height:44px;border-radius:50%;background:#1B2D6E;color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ f.i2 }}</span><div style="min-width:0"><div style="font-weight:600;font-size:16px">{{ f.name }}</div><div style="font-family:'DM Mono',monospace;font-size:12px;color:{{ f.kc }}">{{ f.meta }}</div></div><span style="margin-left:auto;font-family:'DM Mono',monospace;font-size:12px;padding:5px 10px;border-radius:999px;background:#EEF0F9;white-space:nowrap">{{ f.kind }}</span></div>
+              <div style="font-size:14px;color:#4A5273;margin-top:16px">On <span onClick="{{ goHub }}" style="text-decoration:underline;cursor:pointer;color:#0C0E1A">{{ f.product }}</span></div>
+              <div style="font-size:24px;font-weight:700;letter-spacing:-0.03em;margin-top:6px;line-height:1.15">{{ f.title }}</div>
+              <p style="font-size:17px;line-height:1.5;color:#2A3050;margin:8px 0 0">{{ f.text }}</p>
+              <div style="display:flex;gap:8px;margin-top:16px"><span onClick="{{ f.vote }}" style="min-height:44px;padding:0 16px;display:flex;align-items:center;gap:8px;border-radius:999px;border:1.5px solid #0C0E1A;font-size:14px;cursor:pointer;background:{{ f.voteBg }}">▲ Helpful · <span style="font-family:'DM Mono',monospace">{{ f.helpfulN }}</span></span><span style="min-height:44px;padding:0 16px;display:flex;align-items:center;border-radius:999px;border:1.5px solid #E2E6F3;font-size:14px;cursor:pointer;color:#4A5273" style-hover="border-color:#0C0E1A">Reply</span></div>
+            </div>
+          </sc-for>
+        </div>
+        <aside style="flex:1 1 280px;display:grid;gap:16px">
+          <div style="border-radius:28px;background:#00BFA5;padding:24px">
+            <div style="font-size:24px;font-weight:700;letter-spacing:-0.03em">Top contributors</div>
+            <sc-for list="{{ contributors }}" as="c" hint-placeholder-count="3"><div style="display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1.5px solid rgba(12,14,26,0.15)"><span style="width:40px;height:40px;border-radius:50%;background:#0C0E1A;color:#FAFAF7;font-size:13px;display:flex;align-items:center;justify-content:center">{{ c.i }}</span><div style="flex:1"><div style="font-weight:600">{{ c.name }}</div><div style="font-size:13px">{{ c.area }}</div></div><span style="font-family:'DM Mono',monospace;font-size:14px">{{ c.rep }}</span></div></sc-for>
+          </div>
+          <div style="border-radius:28px;background:#EEF0F9;padding:24px;font-size:15px;line-height:1.5"><div style="font-size:20px;font-weight:700;margin-bottom:6px">How verification works</div>Owners link a receipt or retailer order. Verified reviews show how long they've owned the product, and get check-ins at 3, 6 and 12 months.</div>
+        </aside>
+      </div>
+    </main>
+  </sc-if>
+
+  <sc-if value="{{ isNotes }}" hint-placeholder-val="{{ false }}">
+    <main data-screen-label="Notifications" style="max-width:860px;margin:0 auto;padding:clamp(8px,2vw,24px) clamp(16px,4vw,40px) 0">
+      <h1 style="font-weight:700;font-size:clamp(48px,8vw,96px);line-height:0.9;letter-spacing:-0.06em;margin:0">What<br>changed<span style="color:#F59E0B">?</span></h1>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:28px">
+        <sc-for list="{{ noteFilters }}" as="f" hint-placeholder-count="5"><span onClick="{{ f.go }}" style="min-height:44px;padding:0 18px;display:flex;align-items:center;border-radius:999px;border:1.5px solid #0C0E1A;font-size:15px;font-weight:500;cursor:pointer;background:{{ f.bg }};color:{{ f.fg }}">{{ f.t }}</span></sc-for>
+      </div>
+      <div style="margin-top:20px">
+        <sc-for list="{{ notes }}" as="n" hint-placeholder-count="5">
+          <div onClick="{{ n.go }}" style="display:flex;gap:16px;padding:20px 8px;border-top:1.5px solid #E2E6F3;cursor:pointer;align-items:flex-start" style-hover="background:#F3F2EC">
+            <span style="width:12px;height:12px;border-radius:50%;background:{{ n.dot }};margin-top:8px;flex-shrink:0"></span>
+            <div style="flex:1;min-width:0"><div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.06em;color:#4A5273">{{ n.k }}</div><div style="font-size:20px;font-weight:600;letter-spacing:-0.01em;margin-top:2px">{{ n.t }}</div><div style="font-size:16px;color:#4A5273;margin-top:4px">{{ n.d }}</div></div>
+            <span style="font-family:'DM Mono',monospace;font-size:13px;color:#4A5273">{{ n.time }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </main>
+  </sc-if>
+
+  <sc-if value="{{ isReview }}" hint-placeholder-val="{{ false }}">
+    <main data-screen-label="Review update" style="max-width:820px;margin:0 auto;padding:clamp(8px,2vw,24px) clamp(16px,4vw,40px) 0">
+      <sc-if value="{{ reviewOpen }}" hint-placeholder-val="{{ true }}">
+        <span style="display:inline-block;font-family:'DM Mono',monospace;font-size:12px;padding:6px 12px;border-radius:999px;background:#D9F7F2;color:#00695C">6-MONTH CHECK-IN · SONY WH-1000XM4</span>
+        <h1 style="font-weight:700;font-size:clamp(44px,7vw,88px);line-height:0.92;letter-spacing:-0.06em;margin:16px 0 0">Six months in.<br>Still happy?</h1>
+        <p style="font-size:18px;color:#4A5273;margin:16px 0 0;line-height:1.45">24 people found your first review helpful. A quick update keeps it trustworthy.</p>
+        <div style="margin-top:32px"><div style="font-size:20px;font-weight:600">Your rating now</div>
+          <div style="display:flex;gap:6px;align-items:center;margin-top:12px"><sc-for list="{{ starOpts }}" as="o" hint-placeholder-count="5"><span onClick="{{ o.go }}" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;font-size:34px;cursor:pointer;color:{{ o.c }}">★</span></sc-for><span style="font-size:17px;margin-left:8px">{{ starLabel }}</span></div></div>
+        <div style="margin-top:28px"><div style="font-size:20px;font-weight:600">What changed?</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><sc-for list="{{ rChipOpts }}" as="o" hint-placeholder-count="6"><span onClick="{{ o.go }}" style="min-height:44px;padding:0 18px;display:flex;align-items:center;border-radius:999px;border:1.5px solid #0C0E1A;font-size:15px;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.t }}</span></sc-for></div></div>
+        <div style="margin-top:28px"><div style="font-size:20px;font-weight:600">Tell others</div>
+          <textarea value="{{ rText }}" onChange="{{ setRText }}" placeholder="Battery still lasts about 26 hours. Pads are starting to flatten…" rows="5" style="width:100%;margin-top:12px;border-radius:24px;border:2px solid #0C0E1A;padding:18px;font-size:17px;line-height:1.5;background:#fff;outline:0;resize:vertical"></textarea></div>
+        <div style="margin-top:24px"><div style="font-size:20px;font-weight:600">Would you buy it again?</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><sc-for list="{{ recOpts }}" as="o" hint-placeholder-count="3"><span onClick="{{ o.go }}" style="min-height:48px;padding:0 22px;display:flex;align-items:center;border-radius:999px;border:2px solid #0C0E1A;font-size:16px;font-weight:500;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.t }}</span></sc-for></div></div>
+        <div onClick="{{ submitReview }}" style="margin-top:32px;min-height:60px;border-radius:999px;background:#0C0E1A;color:#FAFAF7;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;cursor:pointer" style-hover="background:#1B2D6E">Update my review</div>
+        <p style="font-size:14px;color:#4A5273;text-align:center;margin-top:12px">Your original review stays visible with a dated update.</p>
+      </sc-if>
+      <sc-if value="{{ reviewDone }}" hint-placeholder-val="{{ false }}">
+        <div style="border-radius:36px;background:#00BFA5;padding:clamp(28px,5vw,56px);animation:tkUp .3s ease">
+          <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.1em">REVIEW UPDATED · 6 MONTHS</div>
+          <div style="font-size:clamp(44px,7vw,80px);font-weight:700;letter-spacing:-0.06em;line-height:0.92;margin-top:12px">Thank you, Kumar.</div>
+          <p style="font-size:19px;line-height:1.45;margin:16px 0 0;max-width:520px">Buyers researching the XM4 will now see your 6-month update. You earned +15 reputation.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:24px"><span style="padding:10px 16px;border-radius:999px;background:#0C0E1A;color:#FAFAF7;font-size:14px">✓ Verified owner · 6 months</span><span style="padding:10px 16px;border-radius:999px;background:#FAFAF7;font-size:14px">Next check-in at 12 months</span></div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px"><span onClick="{{ goCommunity }}" style="min-height:52px;padding:0 24px;display:flex;align-items:center;border-radius:999px;border:2px solid #0C0E1A;font-weight:600;cursor:pointer">Back to Community</span><span onClick="{{ goProfile }}" style="min-height:52px;padding:0 24px;display:flex;align-items:center;border-radius:999px;border:2px solid #0C0E1A;font-weight:600;cursor:pointer">See my contributions</span></div>
+      </sc-if>
+    </main>
+  </sc-if>
+
+  <sc-if value="{{ isSaved }}" hint-placeholder-val="{{ false }}">
+    <main data-screen-label="Saved" style="max-width:1200px;margin:0 auto;padding:clamp(8px,2vw,24px) clamp(16px,4vw,40px) 0">
+      <h1 style="font-weight:700;font-size:clamp(48px,8vw,108px);line-height:0.9;letter-spacing:-0.06em;margin:0">Still<br>thinking.</h1>
+      <p style="font-size:18px;color:#4A5273;margin:16px 0 0">3 collections · 12 products · 2 price alerts</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:28px">
+        <sc-for list="{{ stageFilters }}" as="f" hint-placeholder-count="4"><span onClick="{{ f.go }}" style="min-height:44px;padding:0 18px;display:flex;align-items:center;border-radius:999px;border:1.5px solid #0C0E1A;font-size:15px;font-weight:500;cursor:pointer;background:{{ f.bg }};color:{{ f.fg }}">{{ f.t }}</span></sc-for>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px;margin-top:20px">
+        <sc-for list="{{ collections }}" as="c" hint-placeholder-count="3">
+          <div onClick="{{ goHub }}" style="border-radius:32px;padding:26px;background:#fff;border:2px solid #0C0E1A;cursor:pointer;min-height:200px;display:flex;flex-direction:column;justify-content:space-between;gap:16px;transition:transform .25s" style-hover="transform:translateY(-5px)">
+            <div style="display:flex;justify-content:space-between;gap:8px"><span style="font-family:'DM Mono',monospace;font-size:12px;padding:5px 10px;border-radius:999px;background:{{ c.sbg }}">{{ c.stage }}</span><span style="font-family:'DM Mono',monospace;font-size:12px;color:#4A5273">{{ c.updated }}</span></div>
+            <div><div style="font-size:30px;font-weight:700;letter-spacing:-0.04em;line-height:1">{{ c.name }}</div><div style="font-size:15px;color:#4A5273;margin-top:6px">{{ c.n }} products</div></div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:16px;margin-top:16px">
+        <div style="border-radius:32px;background:#F59E0B;padding:clamp(22px,3vw,32px)">
+          <div style="font-size:28px;font-weight:700;letter-spacing:-0.04em">Watching prices</div>
+          <sc-for list="{{ alerts }}" as="a" hint-placeholder-count="2"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:16px 0;border-bottom:1.5px solid rgba(12,14,26,0.18);font-size:18px"><span style="font-weight:600">{{ a.name }}</span><span style="font-family:'DM Mono',monospace;font-size:15px">रू {{ a.now }} → रू {{ a.target }}</span></div></sc-for>
+        </div>
+        <div style="border-radius:32px;background:#EEF0F9;padding:clamp(22px,3vw,32px)">
+          <div style="font-size:28px;font-weight:700;letter-spacing:-0.04em">Research history</div>
+          <sc-for list="{{ history }}" as="h" hint-placeholder-count="3"><div onClick="{{ h.go }}" style="display:flex;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1.5px solid #E2E6F3;cursor:pointer;min-height:44px"><span style="font-size:17px;font-weight:500">{{ h.t }}</span><span style="font-size:14px;color:#4A5273;text-align:right">{{ h.d }}</span></div></sc-for>
+        </div>
+      </div>
+    </main>
+  </sc-if>
+
+  <sc-if value="{{ isProfile }}" hint-placeholder-val="{{ false }}">
+    <main data-screen-label="Profile" style="max-width:960px;margin:0 auto;padding:clamp(8px,2vw,24px) clamp(16px,4vw,40px) 0">
+      <section style="border-radius:36px;background:#1B2D6E;color:#fff;padding:clamp(24px,5vw,48px)">
+        <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap"><span style="width:88px;height:88px;border-radius:50%;background:#F59E0B;color:#0C0E1A;font-size:32px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ user.initials }}</span><div><div style="font-size:clamp(36px,5vw,56px);font-weight:700;letter-spacing:-0.05em;line-height:1">{{ user.name }}</div><div style="font-size:16px;color:#DCE0F5;margin-top:6px">{{ user.since }} · {{ user.region }}</div></div></div>
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:28px">
+          <div><div style="font-size:clamp(36px,5vw,52px);font-weight:700;letter-spacing:-0.05em">{{ user.rep }}</div><div style="font-size:14px;color:#DCE0F5">Helpful votes</div></div>
+          <div><div style="font-size:clamp(36px,5vw,52px);font-weight:700;letter-spacing:-0.05em">{{ user.reviews }}</div><div style="font-size:14px;color:#DCE0F5">Reviews</div></div>
+          <div><div style="font-size:clamp(36px,5vw,52px);font-weight:700;letter-spacing:-0.05em">{{ user.answers }}</div><div style="font-size:14px;color:#DCE0F5">Answers</div></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:20px"><sc-for list="{{ badges }}" as="b" hint-placeholder-count="3"><span style="padding:8px 14px;border-radius:999px;background:rgba(255,255,255,0.12);font-size:14px">{{ b }}</span></sc-for></div>
+      </section>
+      <div style="border-radius:32px;background:#fff;border:2px solid #0C0E1A;padding:8px clamp(20px,3vw,28px);margin-top:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 0;border-bottom:1.5px solid #EEF0F9"><span style="font-size:18px;font-weight:500">Region & currency</span><span style="font-family:'DM Mono',monospace;font-size:15px;color:#4A5273">Nepal · रू NPR</span></div>
+        <sc-for list="{{ toggles }}" as="t" hint-placeholder-count="3">
+          <div onClick="{{ t.go }}" style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 0;border-bottom:1.5px solid #EEF0F9;cursor:pointer"><span style="font-size:18px;font-weight:500">{{ t.t }}</span><span role="switch" aria-label="{{ t.state }}" style="width:56px;height:32px;border-radius:16px;padding:4px;display:flex;justify-content:{{ t.jc }};background:{{ t.bg }};transition:background .2s;flex-shrink:0"><span style="width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.2)"></span></span></div>
+        </sc-for>
+        <div onClick="{{ goHow }}" style="display:flex;justify-content:space-between;align-items:center;padding:18px 0;border-bottom:1.5px solid #EEF0F9;cursor:pointer"><span style="font-size:18px;font-weight:500">How TyoKina works</span><span style="font-size:20px">→</span></div>
+        <div onClick="{{ goNotes }}" style="display:flex;justify-content:space-between;align-items:center;padding:18px 0;cursor:pointer"><span style="font-size:18px;font-weight:500">Notifications</span><span style="font-size:20px">→</span></div>
+      </div>
+      <div style="text-align:center;margin-top:20px"><span style="display:inline-block;font-size:16px;color:#B91C1C;padding:12px;cursor:pointer">Sign out</span></div>
+    </main>
+  </sc-if>
+
+  <sc-if value="{{ isHow }}" hint-placeholder-val="{{ false }}">
+    <main data-screen-label="How TyoKina works" style="max-width:1000px;margin:0 auto;padding:clamp(8px,2vw,24px) clamp(16px,4vw,40px) 0">
+      <div style="font-family:'DM Mono',monospace;font-size:13px;color:#4A5273">त्यो “that” + किन / किन्न “why / buy”</div>
+      <h1 style="font-weight:700;font-size:clamp(52px,9vw,124px);line-height:0.88;letter-spacing:-0.06em;margin:14px 0 0">Buy that?<br><span style="color:#B45309">Why that?</span></h1>
+      <p style="font-size:clamp(18px,2vw,22px);color:#2A3050;max-width:640px;line-height:1.45;margin:24px 0 0">TyoKina helps you answer both — which product, and the evidence behind it. Here's exactly how.</p>
+      <div style="margin-top:40px">
+        <sc-for list="{{ how }}" as="h" hint-placeholder-count="4">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:12px 40px;padding:28px 0;border-top:2px solid #0C0E1A">
+            <div style="display:flex;gap:16px;align-items:baseline"><span style="font-family:'DM Mono',monospace;font-size:14px;color:#B45309">{{ h.n }}</span><span style="font-size:clamp(24px,3vw,32px);font-weight:700;letter-spacing:-0.03em;line-height:1.1">{{ h.t }}</span></div>
+            <p style="font-size:18px;line-height:1.55;margin:0;color:#2A3050">{{ h.d }}</p>
+          </div>
+        </sc-for>
+      </div>
+      <div style="border-radius:32px;background:#0C0E1A;color:#FAFAF7;padding:clamp(24px,4vw,40px);margin-top:16px">
+        <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.1em;color:#FBBF24">WHAT WE'LL NEVER DO</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:16px;margin-top:16px;font-size:19px;font-weight:500;line-height:1.3"><span>Sell sponsored placements</span><span>Let affiliate deals change scores</span><span>Declare a forced winner</span><span>Hide what we don't know</span></div>
+      </div>
+    </main>
+  </sc-if>
+
+  <sc-if value="{{ isExplore }}" hint-placeholder-val="{{ false }}">
+    <main data-screen-label="Explore" style="max-width:1200px;margin:0 auto;padding:clamp(8px,2vw,24px) clamp(16px,4vw,40px) 0">
+      <h1 style="font-weight:700;font-size:clamp(48px,8vw,108px);line-height:0.9;letter-spacing:-0.06em;margin:0">Start with<br>a <span style="color:#B45309">category.</span></h1>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px;margin-top:36px">
+        <sc-for list="{{ cats }}" as="c" hint-placeholder-count="6"><div onClick="{{ c.go }}" style="border-radius:28px;padding:24px;min-height:150px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};transition:transform .25s" style-hover="transform:translateY(-5px)"><span style="font-family:'DM Mono',monospace;font-size:12px">{{ c.c }} products</span><span style="font-size:30px;font-weight:700;letter-spacing:-0.04em">{{ c.n }}</span></div></sc-for>
+      </div>
+      <h2 style="font-size:clamp(32px,4vw,48px);font-weight:700;letter-spacing:-0.04em;margin:56px 0 4px">Buying guides</h2>
+      <p style="font-size:17px;color:#4A5273;margin:0 0 16px">Built from evidence — every guide says how it's funded.</p>
+      <sc-for list="{{ guides }}" as="g" hint-placeholder-count="3">
+        <div onClick="{{ g.go }}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:8px 32px;padding:24px 8px;border-top:2px solid #0C0E1A;cursor:pointer" style-hover="background:#F3F2EC">
+          <div><div style="font-family:'DM Mono',monospace;font-size:12px;color:#B45309">{{ g.tag }}</div><div style="font-size:clamp(22px,2.6vw,30px);font-weight:700;letter-spacing:-0.03em;line-height:1.15;margin-top:6px">{{ g.t }}</div></div>
+          <div style="font-size:15px;color:#4A5273;line-height:1.6">{{ g.meta }}<br><span style="font-family:'DM Mono',monospace;font-size:13px">{{ g.fund }}</span></div>
+        </div>
+      </sc-for>
+    </main>
+  </sc-if>
+
+  <sc-if value="{{ isGuide }}" hint-placeholder-val="{{ false }}">
+    <main data-screen-label="Buying guide" style="max-width:1000px;margin:0 auto;padding:clamp(8px,2vw,24px) clamp(16px,4vw,40px) 0">
+      <span onClick="{{ goExplore }}" style="display:inline-flex;align-items:center;min-height:44px;font-family:'DM Mono',monospace;font-size:13px;color:#4A5273;cursor:pointer">← Explore</span>
+      <div style="font-family:'DM Mono',monospace;font-size:12px;color:#B45309;margin-top:8px">BUYING GUIDE · {{ g.tag }}</div>
+      <h1 style="font-weight:700;font-size:clamp(40px,6.5vw,80px);line-height:0.95;letter-spacing:-0.05em;margin:12px 0 0">{{ g.t }}</h1>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:20px"><span style="padding:8px 14px;border-radius:999px;background:#EEF0F9;font-size:14px">{{ g.meta }}</span><span style="padding:8px 14px;border-radius:999px;background:#FEF3C7;font-size:14px">Funding: {{ g.fund }}</span></div>
+      <p style="font-size:19px;line-height:1.5;margin:28px 0 0;max-width:680px">We shortlisted products with at least 3 independent expert reviews and 50+ verified owners. Pick 2–3 to compare side by side.</p>
+      <div style="display:grid;gap:12px;margin-top:24px">
+        <sc-for list="{{ guideProducts }}" as="c" hint-placeholder-count="3">
+          <div style="display:flex;gap:16px;align-items:center;padding:20px;border-radius:28px;background:#fff;border:2px solid #0C0E1A;flex-wrap:wrap">
+            <span onClick="{{ c.toggle }}" aria-label="Select" style="width:48px;height:48px;border-radius:50%;border:2px solid #0C0E1A;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;flex-shrink:0;background:{{ c.bg }};color:{{ c.fg }}">{{ c.mark }}</span>
+            <div style="flex:1;min-width:200px"><div style="font-family:'DM Mono',monospace;font-size:12px;color:#4A5273">{{ c.brand }} · रू {{ c.price }}</div><div style="font-size:24px;font-weight:700;letter-spacing:-0.03em">{{ c.name }}</div><div style="font-size:15px;color:#2A3050;margin-top:2px">Suits: {{ c.fit }}</div></div>
+            <span onClick="{{ c.open }}" style="font-size:15px;font-weight:600;cursor:pointer;text-decoration:underline;padding:10px 0">Research Hub →</span>
+          </div>
+        </sc-for>
+      </div>
+      <div onClick="{{ comparePicks }}" style="margin-top:20px;min-height:60px;border-radius:999px;background:#0C0E1A;color:#FAFAF7;display:flex;align-items:center;justify-content:center;gap:6px;font-size:18px;font-weight:600;cursor:pointer" style-hover="background:#1B2D6E" data-comment-anchor="95eea2c606-div"><span>Compare</span><span>{{ pickCount }}</span><span>selected</span></div>
+    </main>
+  </sc-if>
+
+  <sc-if value="{{ sheetRetail }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeSheet }}" style="position:fixed;inset:0;z-index:60;background:rgba(12,14,26,0.5);backdrop-filter:blur(4px);display:flex;align-items:flex-end;justify-content:center;padding:12px">
+      <div onClick="{{ stop }}" style="width:min(560px,100%);max-height:88vh;overflow:auto;border-radius:32px;background:#FAFAF7;padding:28px;animation:tkUp .25s ease">
+        <div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:30px;font-weight:700;letter-spacing:-0.04em">Choose a retailer</div><span onClick="{{ closeSheet }}" style="width:44px;height:44px;border-radius:50%;border:1.5px solid #E2E6F3;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px">×</span></div>
+        <p style="font-size:15px;color:#4A5273;line-height:1.45;margin:8px 0 16px">Sorted by price. TyoKina doesn't sell anything — you'll finish on the retailer's site.</p>
+        <sc-for list="{{ retailers }}" as="r" hint-placeholder-count="4">
+          <div onClick="{{ r.pick }}" style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px;border-radius:20px;margin-bottom:8px;cursor:pointer;border:2px solid {{ r.bd }};background:#fff">
+            <div><div style="font-size:18px;font-weight:600">{{ r.name }}</div><div style="font-size:13px;color:#4A5273">{{ r.stock }}</div><div style="font-family:'DM Mono',monospace;font-size:11px;color:#4A5273;margin-top:4px">{{ r.affLabel }}</div></div>
+            <span style="font-family:'DM Mono',monospace;font-size:18px">रू {{ r.price }}</span>
+          </div>
+        </sc-for>
+        <div style="border-radius:16px;background:#EEF0F9;padding:14px 16px;font-size:14px;line-height:1.45;margin-top:8px">Affiliate disclosure: we earn a commission from some retailers. It never changes order, scores or the evidence you see.</div>
+        <div onClick="{{ handoff }}" style="margin-top:16px;min-height:56px;border-radius:999px;background:#0C0E1A;color:#FAFAF7;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:600;cursor:pointer" style-hover="background:#1B2D6E">Continue to {{ pickedRetail }} ↗</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ sheetAlert }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeSheet }}" style="position:fixed;inset:0;z-index:60;background:rgba(12,14,26,0.5);backdrop-filter:blur(4px);display:flex;align-items:flex-end;justify-content:center;padding:12px">
+      <div onClick="{{ stop }}" style="width:min(520px,100%);border-radius:32px;background:#FAFAF7;padding:28px;animation:tkUp .25s ease">
+        <div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:30px;font-weight:700;letter-spacing:-0.04em">Save & set price alert</div><span onClick="{{ closeSheet }}" style="width:44px;height:44px;border-radius:50%;border:1.5px solid #E2E6F3;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px">×</span></div>
+        <p style="font-size:15px;color:#4A5273;margin:8px 0 20px">Sony WH-1000XM5 · today रू 37,000</p>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;border-radius:24px;background:#fff;border:2px solid #0C0E1A;padding:12px">
+          <span onClick="{{ alertDec }}" style="width:52px;height:52px;border-radius:50%;background:#EEF0F9;display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer">−</span>
+          <div style="text-align:center"><div style="font-family:'DM Mono',monospace;font-size:12px;color:#4A5273">ALERT ME AT</div><div style="font-family:'DM Mono',monospace;font-size:34px;font-weight:500">रू {{ alertTargetF }}</div></div>
+          <span onClick="{{ alertInc }}" style="width:52px;height:52px;border-radius:50%;background:#EEF0F9;display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer">+</span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+          <sc-for list="{{ alertChips }}" as="c" hint-placeholder-count="3"><span onClick="{{ c.go }}" style="min-height:40px;padding:0 14px;display:flex;align-items:center;border-radius:999px;border:1.5px solid #0C0E1A;font-size:14px;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }}">{{ c.t }}</span></sc-for>
+        </div>
+        <div onClick="{{ confirmAlert }}" style="margin-top:20px;min-height:56px;border-radius:999px;background:#0C0E1A;color:#FAFAF7;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:600;cursor:pointer" style-hover="background:#1B2D6E">Save to “Travel gear 2026” & set alert</div>
+        <p style="text-align:center;font-size:14px;color:#4A5273;margin:12px 0 0">It's fine to wait — your research is saved.</p>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;left:50%;bottom:100px;transform:translateX(-50%);z-index:70;background:#0C0E1A;color:#FAFAF7;padding:14px 22px;border-radius:999px;font-size:15px;box-shadow:0 12px 30px -10px rgba(12,14,26,0.5);animation:tkUp .25s ease;max-width:calc(100% - 32px);text-align:center">{{ toast }}</div>
+  </sc-if>
+
+  <nav aria-label="Main" style="position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:30;display:flex;gap:2px;padding:6px;border-radius:999px;background:#0C0E1A;box-shadow:0 20px 40px -12px rgba(12,14,26,0.45);max-width:calc(100% - 20px);overflow-x:auto">
+    <sc-for list="{{ nav }}" as="n" hint-placeholder-count="5">
+      <span onClick="{{ n.go }}" style="min-height:44px;padding:0 18px;display:flex;align-items:center;border-radius:999px;font-size:15px;font-weight:500;cursor:pointer;white-space:nowrap;background:{{ n.bg }};color:{{ n.fg }};transition:background .2s">{{ n.label }}</span>
+    </sc-for>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;mood&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Loud&quot;,&quot;Ink&quot;,&quot;Paper&quot;],&quot;default&quot;:&quot;Loud&quot;,&quot;tsType&quot;:&quot;'Loud'|'Ink'|'Paper'&quot;,&quot;section&quot;:&quot;Feel&quot;},&quot;hubLayout&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Chapters&quot;,&quot;Long-form&quot;],&quot;default&quot;:&quot;Chapters&quot;,&quot;tsType&quot;:&quot;'Chapters'|'Long-form'&quot;,&quot;section&quot;:&quot;Research Hub&quot;},&quot;voice&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Questions&quot;,&quot;Plain labels&quot;],&quot;default&quot;:&quot;Plain labels&quot;,&quot;tsType&quot;:&quot;'Questions'|'Plain labels'&quot;,&quot;section&quot;:&quot;Research Hub&quot;}}">
+class Component extends DCLogic {
+  state = { screen: 'home', prev: 'home', tab: 'summary', hl: 0, saved: false, q: '', prios: ['Strong noise cancellation', 'All-day battery', 'Folds flat for travel'],
+    sheet: null, retail: 'Daraz', alertT: 35000, alertSet: false, toast: '', cmp: ['xm5', 'qc45', 'apm'], showSame: false,
+    outcome: null, conf: 0, feedF: 'All', voted: [], noteF: 'All', stageF: 'All', guide: 0, picks: [0, 1],
+    stars: 4, rChips: ['Battery'], rText: '', rRec: 'Yes', rDone: false, priv: { pub: true, anon: false, checkins: true }, ready: !!window.TKC };
+  componentDidMount() { if (!window.TKC) this.t = setInterval(() => { if (window.TKC) { clearInterval(this.t); this.setState({ ready: true }); } }, 40); }
+  componentWillUnmount() { clearInterval(this.t); clearTimeout(this.tt); }
+  npr(n) { const s = String(Math.round(n)); if (s.length <= 3) return s; const last = s.slice(-3); return s.slice(0, -3).replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + last; }
+  bestIdx(k, vals) {
+    const lower = ['Price', 'Weight', 'Vs 12-month high'];
+    if (k === 'Top issue' || new Set(vals).size === 1) return -1;
+    if (vals.includes('Yes')) return vals.filter(v => v === 'Yes').length === 1 ? vals.indexOf('Yes') : -1;
+    if (vals.includes('LDAC')) return vals.indexOf('LDAC');
+    const n = vals.map(v => { const m = String(v).replace(/,/g, '').replace('−', '-').match(/-?\d+(\.\d+)?/); return m ? parseFloat(m[0]) : NaN; });
+    if (n.some(isNaN)) return -1;
+    const t = lower.includes(k) ? Math.min(...n) : Math.max(...n);
+    return n.filter(x => x === t).length === 1 ? n.indexOf(t) : -1;
+  }
+  toast(msg) { clearTimeout(this.tt); this.setState({ toast: msg }); this.tt = setTimeout(() => this.setState({ toast: '' }), 2600); }
+  renderVals() {
+    const D = window.TKC; if (!D) return {};
+    const s = this.state;
+    const go = (screen, extra) => () => { this.setState({ prev: s.screen, screen, sheet: null, ...(extra || {}) }); window.scrollTo(0, 0); };
+    const tabOf = { home: 'home', hub: 'home', explore: 'home', guide: 'home', decide: 'home', compare: 'compare', community: 'community', review: 'community', saved: 'saved', profile: 'profile', how: 'profile', notes: '' };
+    const ink = ['#1B2D6E', '#fff'], teal = ['#00BFA5', '#0C0E1A'], dark = ['#0C0E1A', '#FAFAF7'], amb = ['#F59E0B', '#0C0E1A'];
+    const mood = this.props.mood ?? 'Loud';
+    const palettes = {
+      Loud: [ink, teal, dark, amb],
+      Ink: [ink, ['#2E4290', '#fff'], dark, ['#3D4F9E', '#fff']],
+      Paper: [['#fff', '#0C0E1A'], ['#EEF0F9', '#0C0E1A'], ['#F3F2EC', '#0C0E1A'], ['#FEF3C7', '#0C0E1A']]
+    };
+    const palette = palettes[mood] || palettes.Loud;
+    const ink2 = palette[0], teal2 = palette[1], amb2 = palette[3];
+    const longform = (this.props.hubLayout ?? 'Chapters') === 'Long-form';
+    const plain = (this.props.voice ?? 'Questions') === 'Plain labels';
+    const max = Math.max(...D.pricing.history), min = 30;
+    const segs = v => [0, 1, 2, 3, 4].map(i => i < v ? (v < 2 ? '#F59E0B' : '#10B981') : '#E2E6F3');
+    const ql = s.q.trim().toLowerCase();
+    const xm5 = { 'Strong noise cancellation': true, 'All-day battery': true, 'Folds flat for travel': false, 'Lightweight': false, 'Under रू 40,000': true, 'Hi-res audio': true, 'Long warranty': false };
+    const openHubTab = (tab, hl) => () => { this.setState({ screen: 'hub', tab, hl: hl || 0, sheet: null }); if (hl) setTimeout(() => this.setState({ hl: 0 }), 2200); };
+    const cmpIdx = s.cmp.map(id => D.compare.findIndex(c => c.id === id));
+    const stageBg = { 'Deep research': '#D9F7F2', 'Comparing': '#FEF3C7', 'Saved': '#EEF0F9' };
+    const kindColor = { Review: '#00695C', 'Q&A': '#1B2D6E', Discussion: '#92400E' };
+    const groups = [];
+    D.specs.filter(sp => s.showSame || !sp.same).forEach(sp => { let g = groups.find(x => x.g === sp.g); if (!g) { g = { g: sp.g, rows: [] }; groups.push(g); } const vals = cmpIdx.map(i => sp.v[i]); const best = this.bestIdx(sp.k, vals); g.rows.push({ k: sp.k, cells: cmpIdx.map((i, j) => ({ v: sp.v[i], bg: j === best ? '#FBBF24' : 'transparent', fw: j === best ? 600 : 400, mark: j === best ? '★' : '' })), _x: cmpIdx.map(i => ({ v: sp.v[i] })) }); });
+    const outcomes = { buy: 'You chose a retailer.', wait: 'Saved with a price alert.', skip: 'You decided not to buy — a good outcome too.' };
+    const noteKind = { Price: 'Price', Reply: 'Replies', Update: 'Updates', 'Check-in': 'Check-ins', Community: 'Community' };
+    const G = D.guides[s.guide];
+    return {
+      unread: 3,
+      nav: [['Home', 'home'], ['Compare', 'compare'], ['Community', 'community'], ['Saved', 'saved'], ['Profile', 'profile']].map(([label, k]) => { const on = tabOf[s.screen] === k; return { label, go: go(k), bg: on ? '#F59E0B' : 'transparent', fg: on ? '#0C0E1A' : '#FAFAF7' }; }),
+      isHome: s.screen === 'home', isHub: s.screen === 'hub', isCompare: s.screen === 'compare', isDecide: s.screen === 'decide', isCommunity: s.screen === 'community', isNotes: s.screen === 'notes', isReview: s.screen === 'review', isSaved: s.screen === 'saved', isProfile: s.screen === 'profile', isHow: s.screen === 'how', isExplore: s.screen === 'explore', isGuide: s.screen === 'guide',
+      goHome: go('home'), goHub: go('hub', { tab: 'summary' }), goCompare: go('compare'), goDecide: go('decide'), goNotes: go('notes'), goHow: go('how'), goExplore: go('explore'), goReview: go('review', { rDone: false }), goCommunity: go('community'), goSaved: go('saved'), goProfile: go('profile'),
+      goBack: go(s.prev === 'hub' ? 'home' : s.prev),
+      q: s.q, setQ: e => this.setState({ q: e.target.value }), clearQ: () => this.setState({ q: ql ? '' : 'headphones' }), qIcon: ql ? '×' : '→',
+      hasQ: !!ql, noQ: !ql,
+      results: D.trending.filter(t => (t.brand + ' ' + t.name + ' ' + t.cat).toLowerCase().includes(ql)),
+      resultCount: D.trending.filter(t => (t.brand + ' ' + t.name + ' ' + t.cat).toLowerCase().includes(ql)).length,
+      resultGuides: D.guides.map((g, i) => ({ ...g, go: go('guide', { guide: i }) })).filter(g => (g.t + g.tag).toLowerCase().includes(ql)),
+      continueR: D.continueR.map((c, i) => ({ ...c, w: c.pct + '%', bg: stageBg[c.stage], go: i === 0 ? openHubTab('pricing') : go('compare') })),
+      prioOpts: Object.keys(xm5).map(t => { const on = s.prios.includes(t); return { t, mark: on ? '✓ ' : '', bg: on ? '#0C0E1A' : 'transparent', fg: on ? '#FAFAF7' : '#0C0E1A', toggle: () => this.setState({ prios: on ? s.prios.filter(x => x !== t) : [...s.prios, t] }) }; }),
+      drops: D.drops, trending: D.trending.map((t, i) => ({ ...t, bg: palette[i][0], fg: palette[i][1] })),
+      p: D.product, pr: D.pricing,
+      summarySegs: D.product.summary.map(x => ({ t: x.t, cites: (x.c || []).map(n => ({ n, go: openHubTab('evidence', n) })) })),
+      works: D.product.works, tradeoffs: D.product.tradeoffs,
+      consensus: D.product.consensus.map(c => ({ ...c, label: c.kind === 'agree' ? 'CONSENSUS' : c.kind === 'split' ? 'DISAGREEMENT' : 'LIMITED EVIDENCE', bg: c.kind === 'agree' ? '#D9F7F2' : c.kind === 'split' ? '#FEF3C7' : '#EEF0F9' })),
+      longform, chaptered: !longform, chapterKicker: plain ? 'RESEARCH HUB' : 'RESEARCH IT IN FIVE QUESTIONS',
+      chapters: (plain ? [['summary', 'Summary'], ['evidence', 'Evidence'], ['ownership', 'Ownership'], ['pricing', 'Pricing'], ['community', 'Community']] : [['summary', 'Is it good?'], ['evidence', 'Who says so?'], ['ownership', 'Will it last?'], ['pricing', 'Is now the time?'], ['community', 'What do owners say?']]).map(([k, q], i) => ({ q, n: '0' + (i + 1), go: () => this.setState({ tab: k }), bg: s.tab === k ? '#0C0E1A' : 'transparent', fg: s.tab === k ? '#FAFAF7' : '#2A3050' })),
+      tSummary: longform || s.tab === 'summary', tEvidence: longform || s.tab === 'evidence', tOwnership: longform || s.tab === 'ownership', tPricing: longform || s.tab === 'pricing', tCommunity: longform || s.tab === 'community',
+      sources: D.sources.map(x => ({ ...x, w: x.trust + '%', hasFlag: !!x.flag, ring: x.trust > 80 ? '#10B981' : '#F59E0B', bg: s.hl === x.n ? '#FEF3C7' : '#fff', bd: s.hl === x.n ? '#F59E0B' : '#E2E6F3' })),
+      flagError: () => this.toast('Thanks — a reviewer will check this summary against its sources.'),
+      ownStats: D.ownership.stats.map((o, i) => ({ ...o, bg: [teal2, amb2, ink2][i][0], fg: [teal2, amb2, ink2][i][1] })),
+      issues: D.ownership.issues.map(i => ({ ...i, bg: i.s === 'Unresolved' ? '#FEF3C7' : '#D9F7F2' })),
+      owners: D.ownership.owners,
+      bars: D.pricing.history.map((v, i) => ({ h: ((v - min) / (max - min)) * 100 + '%', c: i === D.pricing.history.length - 1 ? '#0C0E1A' : 'rgba(12,14,26,0.22)', m: D.pricing.months[i] })),
+      retailers: D.retailers.map(r => ({ ...r, affLabel: r.aff ? 'Affiliate link · we earn a commission' : 'No affiliate relationship', bd: s.retail === r.name ? '#0C0E1A' : '#E2E6F3', pick: () => this.setState({ retail: r.name }) })),
+      reviews: D.reviews.map(r => ({ ...r, badge: r.verified ? '✓ Verified owner' : r.kind, kc: r.verified ? '#00695C' : '#1B2D6E' })),
+      saveLabel: s.saved ? '✓ Saved' : 'Save', toggleSave: () => { this.setState({ saved: !s.saved }); this.toast(s.saved ? 'Removed from Saved' : 'Saved to “Travel gear 2026”'); },
+      openRetail: () => this.setState({ sheet: 'retail' }), openAlert: () => this.setState({ sheet: 'alert' }), closeSheet: () => this.setState({ sheet: null }), stop: e => e.stopPropagation(),
+      sheetRetail: s.sheet === 'retail', sheetAlert: s.sheet === 'alert', pickedRetail: s.retail,
+      handoff: () => { this.setState({ sheet: null, outcome: s.screen === 'decide' ? 'buy' : s.outcome }); this.toast('Opening ' + s.retail + ' in a new tab…'); },
+      alertTargetF: this.npr(s.alertT), alertDec: () => this.setState({ alertT: Math.max(30000, s.alertT - 500) }), alertInc: () => this.setState({ alertT: Math.min(37000, s.alertT + 500) }),
+      alertChips: [[35500, 'All-time low · 35,500'], [35000, '35,000'], [36000, '36,000']].map(([v, t]) => ({ t: 'रू ' + t, go: () => this.setState({ alertT: v }), bg: s.alertT === v ? '#0C0E1A' : 'transparent', fg: s.alertT === v ? '#FAFAF7' : '#0C0E1A' })),
+      confirmAlert: () => { this.setState({ sheet: null, alertSet: true, saved: true, outcome: s.screen === 'decide' ? 'wait' : s.outcome }); this.toast('Saved · alert set at रू ' + this.npr(s.alertT)); },
+      alertTitle: s.alertSet ? '✓ Alert set at रू ' + this.npr(s.alertT) + ' — change it' : 'Not ready? Save & set a price alert',
+      hasToast: !!s.toast, toast: s.toast,
+      cmpCols: cmpIdx.map((i, k) => ({ ...D.compare[i], bg: palette[k][0], fg: palette[k][1], line: k === 1 ? 'rgba(12,14,26,0.2)' : 'rgba(255,255,255,0.22)', remove: () => { if (s.cmp.length > 2) this.setState({ cmp: s.cmp.filter(x => x !== D.compare[i].id) }); else this.toast('Compare needs at least 2 products'); }, open: go('hub', { tab: 'summary' }) })),
+      canAdd: s.cmp.length < 3, addProduct: () => this.setState({ cmp: D.compare.map(c => c.id) }),
+      cols: 'repeat(' + s.cmp.length + ',minmax(0,1fr))',
+      specGroups: groups, sameCount: D.specs.filter(x => x.same).length, showSameLabel: s.showSame ? 'Hide identical specs' : 'Show ' + D.specs.filter(x => x.same).length + ' identical specs', toggleSame: () => this.setState({ showSame: !s.showSame }),
+      tradeSummary: D.tradeSummary,
+      coverage: D.decision.coverage.map(c => ({ ...c, segs: segs(c.v) })),
+      myPrios: s.prios.map(t => ({ t, icon: xm5[t] ? '✓' : '×', bg: xm5[t] ? '#00BFA5' : '#F87171', note: xm5[t] ? 'Met' : 'Not met' })),
+      noPrios: s.prios.length === 0,
+      uncertain: D.decision.uncertain, timing: D.decision.timing,
+      chooseRetailer: () => this.setState({ sheet: 'retail' }), saveAlert: () => this.setState({ sheet: 'alert' }), notBuying: () => this.setState({ outcome: 'skip' }),
+      hasOutcome: !!s.outcome, noOutcome: !s.outcome, outcomeText: outcomes[s.outcome] || '',
+      confOpts: [1, 2, 3, 4, 5, 6, 7].map(n => ({ n, go: () => { this.setState({ conf: n }); this.toast('Thanks — this helps us measure confident decisions.'); }, bg: s.conf === n ? '#0C0E1A' : '#fff', fg: s.conf === n ? '#FAFAF7' : '#0C0E1A' })),
+      resetOutcome: () => this.setState({ outcome: null, conf: 0 }),
+      feedFilters: ['All', 'Review', 'Discussion', 'Q&A'].map(f => ({ t: f === 'Review' ? 'Reviews' : f === 'Discussion' ? 'Discussions' : f, go: () => this.setState({ feedF: f }), bg: s.feedF === f ? '#0C0E1A' : 'transparent', fg: s.feedF === f ? '#FAFAF7' : '#0C0E1A' })),
+      feed: D.feed.map((f, i) => ({ ...f, i2: f.i, kc: kindColor[f.kind], helpfulN: f.helpful + (s.voted.includes(i) ? 1 : 0), voteBg: s.voted.includes(i) ? '#F59E0B' : 'transparent', vote: () => this.setState({ voted: s.voted.includes(i) ? s.voted.filter(x => x !== i) : [...s.voted, i] }), verified: f.meta.startsWith('Verified') })).filter(f => s.feedF === 'All' || f.kind === s.feedF),
+      contributors: D.contributors,
+      noteFilters: ['All', 'Price', 'Replies', 'Updates', 'Check-ins'].map(f => ({ t: f, go: () => this.setState({ noteF: f }), bg: s.noteF === f ? '#0C0E1A' : 'transparent', fg: s.noteF === f ? '#FAFAF7' : '#0C0E1A' })),
+      notes: D.notifications.filter(n => s.noteF === 'All' || noteKind[n.k] === s.noteF).map(n => ({ ...n, dot: n.k === 'Check-in' ? '#00BFA5' : n.k === 'Price' ? '#F59E0B' : '#1B2D6E', go: n.go === 'hub' ? openHubTab('pricing') : go(n.go, n.go === 'review' ? { rDone: false } : {}) })),
+      starOpts: [1, 2, 3, 4, 5].map(n => ({ n, go: () => this.setState({ stars: n }), c: n <= s.stars ? '#F59E0B' : '#E2E6F3' })),
+      starLabel: ['', 'Poor', 'Fair', 'Good', 'Very good', 'Excellent'][s.stars],
+      rChipOpts: ['Battery', 'Comfort', 'Build & wear', 'Software', 'Sound', 'Nothing changed'].map(t => { const on = s.rChips.includes(t); return { t, go: () => this.setState({ rChips: on ? s.rChips.filter(x => x !== t) : [...s.rChips, t] }), bg: on ? '#0C0E1A' : 'transparent', fg: on ? '#FAFAF7' : '#0C0E1A' }; }),
+      rText: s.rText, setRText: e => this.setState({ rText: e.target.value }),
+      recOpts: ['Yes', 'With caveats', 'No'].map(t => ({ t, go: () => this.setState({ rRec: t }), bg: s.rRec === t ? '#0C0E1A' : 'transparent', fg: s.rRec === t ? '#FAFAF7' : '#0C0E1A' })),
+      submitReview: () => { this.setState({ rDone: true }); window.scrollTo(0, 0); }, reviewDone: s.rDone, reviewOpen: !s.rDone,
+      stageFilters: ['All', 'Deep research', 'Comparing', 'Saved'].map(f => ({ t: f, go: () => this.setState({ stageF: f }), bg: s.stageF === f ? '#0C0E1A' : 'transparent', fg: s.stageF === f ? '#FAFAF7' : '#0C0E1A' })),
+      collections: D.collections.filter(c => s.stageF === 'All' || c.stage === s.stageF).map(c => ({ ...c, sbg: stageBg[c.stage] })),
+      alerts: D.alerts, history: D.history.map(h => ({ ...h, go: go('hub', { tab: 'summary' }) })),
+      user: D.user, badges: D.user.badges,
+      toggles: [['pub', 'Show my reviews publicly'], ['anon', 'Share anonymised data for insight reports'], ['checkins', 'Ownership check-ins at 3, 6, 12 months']].map(([k, t]) => ({ t, go: () => this.setState({ priv: { ...s.priv, [k]: !s.priv[k] } }), bg: s.priv[k] ? '#00BFA5' : '#E2E6F3', jc: s.priv[k] ? 'flex-end' : 'flex-start', state: s.priv[k] ? 'On' : 'Off' })),
+      how: D.how.map((h, i) => ({ ...h, n: '0' + (i + 1) })),
+      cats: D.categories.map((c, i) => ({ ...c, bg: palette[i % 4][0], fg: palette[i % 4][1], go: go('guide', { guide: 0 }) })),
+      guides: D.guides.map((g, i) => ({ ...g, go: go('guide', { guide: i }) })),
+      g: G,
+      guideProducts: D.compare.map((c, i) => { const on = s.picks.includes(i); return { ...c, mark: on ? '✓' : '+', bg: on ? '#0C0E1A' : '#fff', fg: on ? '#FAFAF7' : '#0C0E1A', toggle: () => this.setState({ picks: on ? s.picks.filter(x => x !== i) : [...s.picks, i] }), open: go('hub', { tab: 'summary' }) }; }),
+      pickCount: s.picks.length,
+      comparePicks: () => { if (s.picks.length < 2) return this.toast('Pick 2–3 products to compare'); this.setState({ screen: 'compare', cmp: s.picks.map(i => D.compare[i].id) }); window.scrollTo(0, 0); }
+    };
+  }
+}
+</script>
+</body>
+</html>
