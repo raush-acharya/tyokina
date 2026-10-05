@@ -22,6 +22,8 @@
   --pale: #DCE0F5;
   --pale-2: #C9CEEA;
   --white: #fff;
+  --low: #065F46;
+  --high: #B91C1C;
   --mono: 'DM Mono', ui-monospace, monospace;
   --sans: Outfit, system-ui, sans-serif;
   --gutter: clamp(16px, 4vw, 40px);
@@ -293,11 +295,30 @@ button {
 .timing-panel { border-radius: 36px; background: var(--amber); padding: clamp(28px, 5vw, 56px); margin-top: 12px; }
 .timing-panel__answer { font-size: clamp(48px, 8vw, 100px); font-weight: 700; letter-spacing: -0.06em; line-height: 0.9; margin-top: 12px; }
 .timing-panel__text { font-size: clamp(18px, 2vw, 23px); max-width: 640px; line-height: 1.4; margin-top: 16px; }
-.timing-panel__stats { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 20px; font-family: var(--mono); font-size: 14px; }
-.bars { display: flex; align-items: flex-end; gap: 8px; height: 160px; margin-top: 28px; }
-.bars__col { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; align-items: center; }
-.bars__bar { width: 100%; border-radius: 10px 10px 4px 4px; }
-.bars__m { font-family: var(--mono); font-size: 11px; }
+.chart-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+.range-tabs { display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: rgba(12, 14, 26, 0.12); }
+.range-tab { min-height: 44px; padding: 0 18px; border-radius: 999px; font-size: 15px; font-weight: 600; }
+.range-tab.is-on { background: var(--ink); color: var(--bg); }
+.chart { position: relative; height: 200px; margin-top: 18px; }
+.chart svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.chart__ref { stroke-width: 1.5; stroke-dasharray: 4 4; opacity: 0.6; }
+.chart__ref--low { stroke: var(--low); }
+.chart__ref--high { stroke: var(--high); }
+.chart__area { fill: rgba(12, 14, 26, 0.1); }
+.chart__line { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
+.chart__dot { position: absolute; transform: translate(-50%, -50%); width: 16px; height: 16px; border-radius: 50%; border: 3px solid var(--bg); }
+.chart__dot--high, .chart__label--high { background: var(--high); }
+.chart__dot--low, .chart__label--low { background: var(--low); }
+.chart__label { position: absolute; padding: 4px 10px; border-radius: 999px; color: var(--white); font-family: var(--mono); font-size: 12px; white-space: nowrap; }
+.chart__label--high { margin-top: -16px; }
+.chart__label--low { margin-top: 16px; }
+.chart__ticks { position: relative; height: 18px; margin-top: 10px; font-family: var(--mono); font-size: 11px; }
+.chart__ticks span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.price-pills { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; font-family: var(--mono); font-size: 14px; }
+.price-pill { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; color: var(--white); }
+.price-pill--low { background: var(--low); }
+.price-pill--high { background: var(--high); }
+.price-pill--today { background: var(--ink); color: var(--bg); }
 
 .retailer { border-radius: 24px; padding: 22px; background: var(--white); border: 2px solid var(--line); display: flex; flex-direction: column; gap: 8px; }
 .retailer__name { font-size: 20px; font-weight: 600; }
@@ -472,7 +493,7 @@ button {
 .switch { width: 56px; height: 32px; border-radius: 16px; padding: 4px; display: flex; justify-content: flex-start; background: var(--line); transition: background 0.2s; flex-shrink: 0; }
 .switch.is-on { justify-content: flex-end; background: var(--teal); }
 .switch span { width: 24px; height: 24px; border-radius: 50%; background: var(--white); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); }
-.sign-out { font-size: 16px; color: #B91C1C; padding: 12px; }
+.sign-out { font-size: 16px; color: var(--high); padding: 12px; }
 
 /* ── How it works ──────────────────────────────────────── */
 .etymology { font-family: var(--mono); font-size: 13px; color: var(--muted); }

@@ -68,7 +68,11 @@ const raw = {
       { i: "PK", name: "Prerana K.", time: "Owned 18 months", text: "Battery has slightly degraded but still lasts a full workday. A firmware update briefly broke touch — fixed a week later." }
     ]
   },
-  pricing: { low: "35,500", lowWhen: "Dashain 2025", high: "46,000", signal: "Good time to buy", history: [46, 45.5, 44, 44, 42.5, 43, 41, 40, 41, 39.5, 38, 37], months: ["O", "N", "D", "J", "F", "M", "A", "M", "J", "J", "A", "S"] },
+  pricing: { low: "35,500", lowWhen: "Dashain 2025", high: "46,000", signal: "Good time to buy", history: [46, 45.5, 44, 44, 42.5, 43, 41, 40, 41, 39.5, 38, 37], months: ["O", "N", "D", "J", "F", "M", "A", "M", "J", "J", "A", "S"],
+    // Prices in thousands of रू for the Weekly and Monthly chart ranges.
+    week: [37.8, 37.8, 37.5, 37.6, 37.2, 37, 37],
+    weekDays: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Today"],
+    month: [39.5, 39.5, 39.2, 39.5, 39, 38.8, 38.8, 38.5, 38, 38, 38.5, 38.9, 38.7, 38.2, 38, 37.8, 37.5, 37.5, 37.9, 38.2, 38, 37.6, 37.4, 37.2, 37.5, 37.3, 37, 37, 37.2, 37] },
   retailers: [
     { name: "Daraz", price: "37,000", stock: "In stock · 2-day delivery", aff: true },
     { name: "HamroBazar", price: "37,500", stock: "In stock · Pickup in Kathmandu", aff: false },

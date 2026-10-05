@@ -1,5 +1,5 @@
 import { data } from '../data'
-import { useApp, type HubTab } from '../state'
+import { useApp, type HubTab, type PriceRange } from '../state'
 import { autoGrid, amber, ink, swatch, teal } from '../lib/theme'
 import { affLabel } from '../components/Sheets'
 import { BackLink, Kicker, ProductShot, cx } from '../components/ui'
@@ -200,26 +200,72 @@ function Ownership() {
   )
 }
 
+const RANGES: Record<PriceRange, { span: string; v: number[]; l: string[]; every: number }> = {
+  Weekly: { span: 'LAST 7 DAYS', v: pr.week, l: pr.weekDays, every: 1 },
+  Monthly: { span: 'LAST 30 DAYS', v: pr.month, l: pr.month.map((_, i) => i === 29 ? 'Today' : (29 - i) + 'd'), every: 5 },
+  Yearly: { span: 'LAST 12 MONTHS', v: pr.history, l: pr.months, every: 1 },
+}
+
+/** Line chart geometry in a 0–100 box; prices are in thousands of रू. */
+function chartFor(range: PriceRange) {
+  const { span, v, l, every } = RANGES[range]
+  const n = v.length, hi = Math.max(...v), lo = Math.min(...v), pad = 14
+  const X = (i: number) => (i / (n - 1)) * 100
+  const Y = (x: number) => pad + ((hi - x) / ((hi - lo) || 1)) * (100 - pad * 2)
+  const hiI = v.indexOf(hi), loI = v.lastIndexOf(lo)
+  // Keep marker labels inside the chart near its left and right edges.
+  const tf = (i: number) => X(i) < 12 ? 'translate(0,-50%)' : X(i) > 88 ? 'translate(-100%,-50%)' : 'translate(-50%,-50%)'
+  const pts = v.map((x, i) => X(i).toFixed(2) + ',' + Y(x).toFixed(2)).join(' ')
+  return {
+    span, pts, area: 'M0,100 L' + pts.split(' ').join(' L') + ' L100,100 Z',
+    high: { x: X(hiI), y: Y(hi), v: npr(hi * 1000), l: l[hiI], tf: tf(hiI) },
+    low: { x: X(loI), y: Y(lo), v: npr(lo * 1000), l: l[loI], tf: tf(loI) },
+    ticks: l.map((t, i) => ({ t, x: X(i), i })).filter(t => t.i % every === 0 || t.i === n - 1),
+  }
+}
+
 function Pricing() {
   const { s, set } = useApp()
-  const max = Math.max(...pr.history), min = 30
-  const last = pr.history.length - 1
   const drop = npr((Number(pr.high.replace(/,/g, '')) - Number(p.price.replace(/,/g, ''))))
+  const c = chartFor(s.range)
   return (
     <>
       <section className="timing-panel">
         <div className="mono-12 ls-1">IS NOW THE TIME? · SIGNAL: {pr.signal}</div>
         <div className="timing-panel__answer">Yes, mostly.</div>
         <p className="timing-panel__text">रू {drop} under its 12-month high. The all-time low was रू {pr.low} during {pr.lowWhen} — it may dip again.</p>
-        <div className="bars" role="img" aria-label="Price over the last 12 months, falling from रू 46,000 to रू 37,000">
-          {pr.history.map((v, i) => (
-            <div key={i} className="bars__col">
-              <span className="bars__bar" style={{ height: ((v - min) / (max - min)) * 100 + '%', background: i === last ? '#0C0E1A' : 'rgba(12,14,26,0.22)' }} />
-              <span className="bars__m">{pr.months[i]}</span>
+        <div className="chart-head">
+          <div className="mono-12 ls-1">PRICE · {c.span}</div>
+          <div className="range-tabs" role="tablist" aria-label="Price range">
+            {(['Weekly', 'Monthly', 'Yearly'] as const).map(r => (
+              <button key={r} type="button" role="tab" aria-selected={s.range === r} className={cx('range-tab', s.range === r && 'is-on')} onClick={() => set({ range: r })}>{r}</button>
+            ))}
+          </div>
+        </div>
+        <div className="chart" role="img" aria-label={`Price over the ${c.span.toLowerCase()}: high रू ${c.high.v}, low रू ${c.low.v}, today रू ${p.price}`}>
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
+            <line x1="0" x2="100" y1={c.low.y} y2={c.low.y} className="chart__ref chart__ref--low" vectorEffect="non-scaling-stroke" />
+            <line x1="0" x2="100" y1={c.high.y} y2={c.high.y} className="chart__ref chart__ref--high" vectorEffect="non-scaling-stroke" />
+            <path d={c.area} className="chart__area" />
+            <polyline points={c.pts} className="chart__line" vectorEffect="non-scaling-stroke" />
+          </svg>
+          {(['high', 'low'] as const).map(k => (
+            <div key={k}>
+              <div className={`chart__dot chart__dot--${k}`} style={{ left: c[k].x + '%', top: c[k].y + '%' }} />
+              <div className={`chart__label chart__label--${k}`} style={{ left: c[k].x + '%', top: c[k].y + '%', transform: c[k].tf }}>
+                {k === 'high' ? 'High' : 'Low'} रू {c[k].v}
+              </div>
             </div>
           ))}
         </div>
-        <div className="timing-panel__stats"><span>All-time low · रू {pr.low}</span><span>All-time high · रू {pr.high}</span><span>Today · रू {p.price}</span></div>
+        <div className="chart__ticks" aria-hidden>
+          {c.ticks.map(t => <span key={t.i} style={{ left: t.x + '%' }}>{t.t}</span>)}
+        </div>
+        <div className="price-pills">
+          <span className="price-pill price-pill--low">▼ Lowest · रू {c.low.v} · {c.low.l}</span>
+          <span className="price-pill price-pill--high">▲ Highest · रू {c.high.v} · {c.high.l}</span>
+          <span className="price-pill price-pill--today">Today · रू {p.price}</span>
+        </div>
       </section>
       <div style={autoGrid(240, 12)} className="mt-16">
         {data.retailers.map(r => (

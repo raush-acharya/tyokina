@@ -6,6 +6,7 @@ export type Screen =
 export type HubTab = 'summary' | 'evidence' | 'ownership' | 'pricing' | 'community'
 export type Sheet = 'retail' | 'alert' | null
 export type Outcome = 'buy' | 'wait' | 'skip' | null
+export type PriceRange = 'Weekly' | 'Monthly' | 'Yearly'
 
 const SCREENS: Screen[] = ['home', 'hub', 'compare', 'decide', 'community', 'notes', 'review', 'saved', 'profile', 'how', 'explore', 'guide']
 
@@ -27,6 +28,8 @@ export interface AppState {
   showSame: boolean
   outcome: Outcome
   conf: number
+  /** Time span shown on the Pricing chart. */
+  range: PriceRange
   feedF: string
   voted: number[]
   noteF: string
@@ -50,7 +53,7 @@ const initial = (): AppState => ({
   screen: screenFromHash(), prev: 'home', tab: 'summary', hl: 0, saved: false, q: '',
   prios: ['Strong noise cancellation', 'All-day battery', 'Folds flat for travel'],
   sheet: null, retail: 'Daraz', alertT: 35000, alertSet: false, toast: '',
-  cmp: ['xm5', 'qc45', 'apm'], showSame: false, outcome: null, conf: 0,
+  cmp: ['xm5', 'qc45', 'apm'], showSame: false, outcome: null, conf: 0, range: 'Yearly',
   feedF: 'All', voted: [], noteF: 'All', stageF: 'All', guide: 0, picks: [0, 1],
   stars: 4, rChips: ['Battery'], rText: '', rRec: 'Yes', rDone: false,
   priv: { pub: true, anon: false, checkins: true },
@@ -100,8 +103,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (screenFromHash() !== s.screen || !window.location.hash) {
       const url = '#/' + s.screen
-      if (window.location.hash) history.pushState(null, '', url)
-      else history.replaceState(null, '', url)
+      try {
+        if (window.location.hash) history.pushState(null, '', url)
+        else history.replaceState(null, '', url)
+      } catch {
+        // Sandboxed frames can refuse history updates; navigation still works in-app.
+      }
     }
   }, [s.screen])
 
