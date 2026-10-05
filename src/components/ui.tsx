@@ -1,6 +1,7 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react'
+import type { ButtonHTMLAttributes, KeyboardEvent, ReactNode } from 'react'
+import { Icon } from './Icon'
 
-const cx = (...c: (string | false | undefined)[]) => c.filter(Boolean).join(' ')
+export const cx = (...c: (string | false | undefined)[]) => c.filter(Boolean).join(' ')
 
 /** Pill-shaped toggle used for filters and choices. */
 export function Chip({ on, className, ...rest }: { on: boolean } & ButtonHTMLAttributes<HTMLButtonElement>) {
@@ -21,16 +22,33 @@ export function ChipRow<T extends string>({ options, value, onChange, label, lab
   )
 }
 
-export function Kicker({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cx('kicker', className)}>{children}</div>
+/**
+ * Arrow-key handler for a tablist or radiogroup: moves focus and selection
+ * to the previous/next/first/last item, per the ARIA authoring practices.
+ */
+export function arrowNav(e: KeyboardEvent<HTMLElement>) {
+  const keys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End']
+  if (!keys.includes(e.key)) return
+  const items = [...e.currentTarget.querySelectorAll<HTMLElement>('[role=tab],[role=radio]')]
+  const i = items.indexOf(document.activeElement as HTMLElement)
+  if (i < 0) return
+  e.preventDefault()
+  const n = items.length
+  const next = e.key === 'Home' ? 0 : e.key === 'End' ? n - 1
+    : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? (i - 1 + n) % n : (i + 1) % n
+  items[next].focus()
+  items[next].click()
 }
 
 export function BackLink({ onClick, children }: { onClick: () => void; children: ReactNode }) {
-  return <button type="button" className="back-link" onClick={onClick}>{children}</button>
+  return <button type="button" className="back-link" onClick={onClick}><Icon name="arrowLeft" size={18} />{children}</button>
 }
 
-export function ProductShot({ label = 'product shot' }: { label?: string }) {
+export function ProductShot({ label = 'Product photo coming soon' }: { label?: string }) {
   return <div className="product-shot" role="img" aria-label="Product photo placeholder"><span>{label}</span></div>
 }
 
-export { cx }
+/** A price or other figure, set in the numeric face. */
+export function Num({ children, className }: { children: ReactNode; className?: string }) {
+  return <span className={cx('num', className)}>{children}</span>
+}

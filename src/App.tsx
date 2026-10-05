@@ -18,9 +18,10 @@ function Shell() {
   const Current = SCREENS[s.screen]
   return (
     <div className="app">
-      <a className="skip-link" href="#main">Skip to content</a>
+      {/* Focus the content directly; a #main hash would read as a screen change. */}
+      <a className="skip-link" href="#main" onClick={e => { e.preventDefault(); document.getElementById('main')?.focus() }}>Skip to content</a>
       <Header />
-      <div id="main" key={s.screen}><Current /></div>
+      <div id="main" tabIndex={-1} key={s.screen}><Current /></div>
       <Sheets />
       <Toast />
       <BottomNav />

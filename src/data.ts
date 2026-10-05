@@ -69,6 +69,7 @@ const raw = {
     ]
   },
   pricing: { low: "35,500", lowWhen: "Dashain 2025", high: "46,000", signal: "Good time to buy", history: [46, 45.5, 44, 44, 42.5, 43, 41, 40, 41, 39.5, 38, 37], months: ["O", "N", "D", "J", "F", "M", "A", "M", "J", "J", "A", "S"],
+    monthsFull: ["Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"],
     // Prices in thousands of रू for the Weekly and Monthly chart ranges.
     week: [37.8, 37.8, 37.5, 37.6, 37.2, 37, 37],
     weekDays: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Today"],
@@ -85,10 +86,10 @@ const raw = {
     { i: "DC", name: "Dipesh C.", owned: "Doesn't own", verified: false, kind: "Q&A", title: "XM5 vs QC45 for 10-hour flights?", text: "Comfort on long flights is my #1 priority. Fly KTM–London four times a year. Which would you pick?", helpful: 22, updated: "4 answers" }
   ],
   feed: [
-    { i: "SC", name: "Suman Chhetri", meta: "Verified owner · Owned 2 years", product: "Sony WH-1000XM4", kind: "Review", title: "Two years in — still worth every paisa", text: "Bought for WFH in 2022. Replacement pads were easy to find in New Road.", helpful: 214 },
-    { i: "PS", name: "Priya Sharma", meta: "Discussion", product: "MacBook Air M3", kind: "Discussion", title: "M3 vs M2 — worth the upgrade for light dev work?", text: "I'm on an M2 Air and my company is offering an upgrade. For TypeScript and some Docker work — is it worth it?", helpful: 41 },
-    { i: "JL", name: "Jeevan Lama", meta: "Verified owner · Owned 5 days", product: "LG C4 OLED 65\"", kind: "Review", title: "Best TV I've owned — the blacks are unreal", text: "Upgraded from a 2017 LED. Gaming at 120Hz with HDMI 2.1 is buttery smooth. Will update at 3 months.", helpful: 18 },
-    { i: "AP", name: "Aayush Pandey", meta: "Q&A", product: "Bose QC45", kind: "Q&A", title: "QC45 or XM5 for 10-hour international flights?", text: "Comfort on long flights is my priority — sound second. Fly KTM–Dubai often.", helpful: 22 }
+    { i: "SC", name: "Suman Chhetri", meta: "Verified owner · Owned 2 years", product: "Sony WH-1000XM4", pid: "xm4", kind: "Review", title: "Two years in — still worth every paisa", text: "Bought for WFH in 2022. Replacement pads were easy to find in New Road.", helpful: 214 },
+    { i: "PS", name: "Priya Sharma", meta: "Discussion", product: "MacBook Air M3", pid: "mba", kind: "Discussion", title: "M3 vs M2 — worth the upgrade for light dev work?", text: "I'm on an M2 Air and my company is offering an upgrade. For TypeScript and some Docker work — is it worth it?", helpful: 41 },
+    { i: "JL", name: "Jeevan Lama", meta: "Verified owner · Owned 5 days", product: "LG C4 OLED 65\"", pid: "lgc4", kind: "Review", title: "Best TV I've owned — the blacks are unreal", text: "Upgraded from a 2017 LED. Gaming at 120Hz with HDMI 2.1 is buttery smooth. Will update at 3 months.", helpful: 18 },
+    { i: "AP", name: "Aayush Pandey", meta: "Q&A", product: "Bose QC45", pid: "qc45", kind: "Q&A", title: "QC45 or XM5 for 10-hour international flights?", text: "Comfort on long flights is my priority — sound second. Fly KTM–Dubai often.", helpful: 22 }
   ],
   contributors: [{ i: "KG", name: "Krishna G.", area: "Cameras · Pokhara", rep: "3,120" }, { i: "SC", name: "Suman C.", area: "Audio", rep: "1,804" }, { i: "NB", name: "Nisha B.", area: "Appliances", rep: "1,212" }],
   compare: [
@@ -119,13 +120,13 @@ const raw = {
     uncertain: ["18 owners report headband padding wear after a year. Sony hasn't confirmed a fix.", "Little data beyond 2 years of ownership."],
     timing: "रू 9,000 below its 12-month high. Prices have dipped further during past Dashain sales."
   },
-  continueR: [{ name: "Sony WH-1000XM5", stage: "Deep research", step: "Evidence read · Pricing next", pct: 72 }, { name: "MacBook Air M3", stage: "Comparing", step: "vs Dell XPS 13", pct: 40 }],
-  drops: [{ name: "Sony WH-1000XM5", price: "37,000", d: "−रू 9,000", note: "12-month low" }, { name: "Samsung Galaxy S24", price: "1,24,999", d: "−रू 15,000", note: "Below average" }, { name: "Dyson V15", price: "89,900", d: "−रू 6,100", note: "Near all-time low" }],
+  continueR: [{ id: "xm5", name: "Sony WH-1000XM5", stage: "Deep research", step: "Evidence read · Pricing next", pct: 72 }, { id: "mba", name: "MacBook Air M3", stage: "Comparing", step: "vs Dell XPS 13", pct: 40 }],
+  drops: [{ id: "xm5", name: "Sony WH-1000XM5", price: "37,000", d: "−रू 9,000", note: "12-month low" }, { id: "s24", name: "Samsung Galaxy S24", price: "1,24,999", d: "−रू 15,000", note: "Below average" }, { id: "v15", name: "Dyson V15", price: "89,900", d: "−रू 6,100", note: "Near all-time low" }],
   trending: [
-    { brand: "Sony", name: "WH-1000XM5", cat: "Headphones", price: "37,000", score: "8.9", note: "−20% vs 12-mo high" },
-    { brand: "Apple", name: "MacBook Air M3", cat: "Laptops", price: "1,45,000", score: "9.1", note: "28 new owner reports" },
-    { brand: "LG", name: "C4 OLED 65\"", cat: "TVs", price: "2,11,000", score: "8.7", note: "Limited long-term data" },
-    { brand: "Logitech", name: "MX Master 3S", cat: "Accessories", price: "14,500", score: "9.0", note: "312 verified owners" }
+    { id: "xm5", brand: "Sony", name: "WH-1000XM5", cat: "Headphones", price: "37,000", score: "8.9", note: "−20% vs 12-mo high" },
+    { id: "mba", brand: "Apple", name: "MacBook Air M3", cat: "Laptops", price: "1,45,000", score: "9.1", note: "28 new owner reports" },
+    { id: "lgc4", brand: "LG", name: "C4 OLED 65\"", cat: "TVs", price: "2,11,000", score: "8.7", note: "Limited long-term data" },
+    { id: "mx3s", brand: "Logitech", name: "MX Master 3S", cat: "Accessories", price: "14,500", score: "9.0", note: "312 verified owners" }
   ],
   categories: [{ n: "Headphones", c: 138 }, { n: "Laptops", c: 214 }, { n: "Phones", c: 176 }, { n: "TVs", c: 82 }, { n: "Cameras", c: 64 }, { n: "Appliances", c: 245 }],
   guides: [
@@ -138,13 +139,13 @@ const raw = {
     { name: "Travel gear 2026", n: 3, stage: "Deep research", updated: "1 week ago" },
     { name: "Gaming setup", n: 5, stage: "Saved", updated: "3 weeks ago" }
   ],
-  history: [{ t: "Sony WH-1000XM5", d: "Today · Evidence tab" }, { t: "Bose QuietComfort 45", d: "Yesterday · Compare" }, { t: "Best ANC headphones under रू 40,000", d: "2 days ago · Guide" }],
-  alerts: [{ name: "Sony WH-1000XM5", target: "35,000", now: "37,000" }, { name: "MacBook Air M3", target: "1,35,000", now: "1,45,000" }],
+  history: [{ pid: "xm5", t: "Sony WH-1000XM5", d: "Today · Evidence tab" }, { pid: "qc45", t: "Bose QuietComfort 45", d: "Yesterday · Compare" }, { guide: 0, t: "Best ANC headphones under रू 40,000", d: "2 days ago · Guide" }],
+  alerts: [{ pid: "xm5", name: "Sony WH-1000XM5", target: "35,000", now: "37,000" }, { pid: "mba", name: "MacBook Air M3", target: "1,35,000", now: "1,45,000" }],
   notifications: [
-    { k: "Price", t: "WH-1000XM5 dropped रू 6,000", d: "Now रू 37,000 — lowest in 12 months", time: "2h", go: "hub" },
+    { k: "Price", pid: "xm5", t: "WH-1000XM5 dropped रू 6,000", d: "Now रू 37,000 — lowest in 12 months", time: "2h", go: "hub" },
     { k: "Check-in", t: "You've owned the Sony WH-1000XM4 for 6 months", d: "Update your review — 24 people marked it helpful", time: "1d", go: "review" },
     { k: "Reply", t: "Prerana K. answered your question", d: "“Battery is still above 25 hours after 18 months…”", time: "5h", go: "community" },
-    { k: "Update", t: "New long-term report on LG C4 OLED", d: "3 owners after 18 months", time: "2d", go: "hub" },
+    { k: "Update", pid: "lgc4", t: "New long-term report on LG C4 OLED", d: "3 owners after 18 months", time: "2d", go: "hub" },
     { k: "Community", t: "Your review was marked helpful 12 times", d: "Sony WH-1000XM4 · this week", time: "3d", go: "profile" }
   ],
   how: [
@@ -168,13 +169,49 @@ export const data = {
   notifications: raw.notifications as (Raw['notifications'][number] & { k: NoteKind; go: NoteTarget })[],
 }
 
-/** Whether the XM5 meets each buyer priority offered on Home. */
-export const xm5Meets: Record<string, boolean> = {
-  'Strong noise cancellation': true,
-  'All-day battery': true,
-  'Folds flat for travel': false,
-  'Lightweight': false,
-  'Under रू 40,000': true,
-  'Hi-res audio': true,
-  'Long warranty': false,
+export interface CatalogItem {
+  id: string
+  brand: string
+  name: string
+  cat: string
+  price?: string
+  score?: string
+  note: string
+  /** Only the XM5 has a full Research Hub in this preview. */
+  full?: boolean
 }
+
+export const catalog: Record<string, CatalogItem> = {
+  xm5: { id: 'xm5', brand: 'Sony', name: 'WH-1000XM5', cat: 'Headphones', price: '37,000', score: '8.9', note: '4 expert sources · 2,847 owners', full: true },
+  qc45: { id: 'qc45', brand: 'Bose', name: 'QuietComfort 45', cat: 'Headphones', price: '32,500', score: '8.5', note: '3 expert sources · 198 verified owners' },
+  apm: { id: 'apm', brand: 'Apple', name: 'AirPods Max', cat: 'Headphones', price: '59,500', score: '8.3', note: '3 expert sources · 87 verified owners' },
+  xm4: { id: 'xm4', brand: 'Sony', name: 'WH-1000XM4', cat: 'Headphones', note: 'Previous generation · 1,204 verified owners' },
+  mba: { id: 'mba', brand: 'Apple', name: 'MacBook Air M3', cat: 'Laptops', price: '1,45,000', score: '9.1', note: '28 new owner reports this month' },
+  lgc4: { id: 'lgc4', brand: 'LG', name: 'C4 OLED 65"', cat: 'TVs', price: '2,11,000', score: '8.7', note: 'Limited long-term data' },
+  mx3s: { id: 'mx3s', brand: 'Logitech', name: 'MX Master 3S', cat: 'Accessories', price: '14,500', score: '9.0', note: '312 verified owners' },
+  s24: { id: 's24', brand: 'Samsung', name: 'Galaxy S24', cat: 'Phones', price: '1,24,999', note: 'रू 15,000 below its average price' },
+  v15: { id: 'v15', brand: 'Dyson', name: 'V15', cat: 'Appliances', price: '89,900', note: 'Near its all-time low' },
+}
+
+/** Buyer priorities offered per category; the XM5 is the only product checked against them. */
+export const priorityOptions: Record<string, string[]> = {
+  Headphones: ['Strong noise cancellation', 'All-day battery', 'Folds flat for travel', 'Lightweight', 'Under रू 40,000', 'Hi-res audio', 'Long warranty'],
+  Laptops: ['All-day battery', 'Under 1.5 kg', 'Long software support', 'Good keyboard', 'Under रू 1,50,000'],
+  Phones: ['Great camera', 'All-day battery', 'Long software updates', 'Compact size', 'Under रू 1,00,000'],
+  TVs: ['Dark-room picture', 'Gaming at 120 Hz', 'Bright-room picture', 'Under रू 2,00,000'],
+}
+
+/** Whether the XM5 meets each headphone priority, and which Compare row it maps to. */
+export const xm5Meets: Record<string, { met: boolean; spec: string }> = {
+  'Strong noise cancellation': { met: true, spec: 'Noise cancellation' },
+  'All-day battery': { met: true, spec: 'Battery' },
+  'Folds flat for travel': { met: false, spec: 'Folds flat' },
+  'Lightweight': { met: false, spec: 'Weight' },
+  'Under रू 40,000': { met: true, spec: 'Price' },
+  'Hi-res audio': { met: true, spec: 'Hi-res audio' },
+  'Long warranty': { met: false, spec: 'Warranty in Nepal' },
+}
+
+/** Search link for a source's original review (no deep links in the preview data). */
+export const sourceUrl = (outlet: string) =>
+  'https://www.google.com/search?q=' + encodeURIComponent(`${outlet} Sony WH-1000XM5 review`)

@@ -18,7 +18,10 @@ export interface AppState {
   hl: number
   saved: boolean
   q: string
-  prios: string[]
+  /** Product shown in the Research Hub (a catalog id). */
+  pid: string
+  /** Buyer priorities, saved separately for each category. */
+  prios: Record<string, string[]>
   sheet: Sheet
   retail: string
   alertT: number
@@ -44,14 +47,14 @@ export interface AppState {
   priv: { pub: boolean; anon: boolean; checkins: boolean }
 }
 
-function screenFromHash(): Screen {
+function screenFromHash(): Screen | null {
   const h = window.location.hash.replace(/^#\/?/, '') as Screen
-  return SCREENS.includes(h) ? h : 'home'
+  return SCREENS.includes(h) ? h : null
 }
 
 const initial = (): AppState => ({
-  screen: screenFromHash(), prev: 'home', tab: 'summary', hl: 0, saved: false, q: '',
-  prios: ['Strong noise cancellation', 'All-day battery', 'Folds flat for travel'],
+  screen: screenFromHash() ?? 'home', prev: 'home', tab: 'summary', hl: 0, saved: false, q: '', pid: 'xm5',
+  prios: { Headphones: ['Strong noise cancellation', 'All-day battery', 'Folds flat for travel'] },
   sheet: null, retail: 'Daraz', alertT: 35000, alertSet: false, toast: '',
   cmp: ['xm5', 'qc45', 'apm'], showSame: false, outcome: null, conf: 0, range: 'Yearly',
   feedF: 'All', voted: [], noteF: 'All', stageF: 'All', guide: 0, picks: [0, 1],
@@ -64,6 +67,8 @@ interface AppApi {
   set: (patch: Partial<AppState>) => void
   go: (screen: Screen, extra?: Partial<AppState>) => void
   openHubTab: (tab: HubTab, highlight?: number) => void
+  /** Open a product's Research Hub at its summary. */
+  openProduct: (pid: string, tab?: HubTab) => void
   toast: (msg: string) => void
 }
 
@@ -82,16 +87,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const openHubTab = useCallback((tab: HubTab, highlight = 0) => {
-    setS(prev => {
-      if (prev.screen !== 'hub') window.scrollTo(0, 0)
-      return { ...prev, prev: prev.screen === 'hub' ? prev.prev : prev.screen, screen: 'hub', tab, hl: highlight, sheet: null }
-    })
+    if (!highlight) window.scrollTo(0, 0)
+    setS(prev => ({ ...prev, prev: prev.screen === 'hub' ? prev.prev : prev.screen, screen: 'hub', tab, hl: highlight, sheet: null }))
     window.clearTimeout(hlTimer.current)
     if (highlight) {
       requestAnimationFrame(() => document.getElementById('source-' + highlight)?.scrollIntoView({ behavior: 'smooth', block: 'center' }))
       hlTimer.current = window.setTimeout(() => setS(prev => ({ ...prev, hl: 0 })), 2200)
     }
   }, [])
+
+  const openProduct = useCallback((pid: string, tab: HubTab = 'summary') => go('hub', { pid, tab, hl: 0 }), [go])
 
   const toast = useCallback((msg: string) => {
     window.clearTimeout(toastTimer.current)
@@ -113,7 +118,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [s.screen])
 
   useEffect(() => {
-    const onPop = () => setS(prev => ({ ...prev, prev: prev.screen, screen: screenFromHash(), sheet: null }))
+    const onPop = () => {
+      const screen = screenFromHash()
+      if (screen) setS(prev => ({ ...prev, prev: prev.screen, screen, sheet: null }))
+    }
     window.addEventListener('popstate', onPop)
     return () => {
       window.removeEventListener('popstate', onPop)
@@ -122,7 +130,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const api = useMemo(() => ({ s, set, go, openHubTab, toast }), [s, set, go, openHubTab, toast])
+  const api = useMemo(() => ({ s, set, go, openHubTab, openProduct, toast }), [s, set, go, openHubTab, openProduct, toast])
   return <AppContext.Provider value={api}>{children}</AppContext.Provider>
 }
 
