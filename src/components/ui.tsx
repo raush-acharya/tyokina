@@ -44,9 +44,6 @@ export function BackLink({ onClick, children }: { onClick: () => void; children:
   return <button type="button" className="back-link" onClick={onClick}><Icon name="arrowLeft" size={18} />{children}</button>
 }
 
-export function ProductShot({ label = 'Product photo coming soon' }: { label?: string }) {
-  return <div className="product-shot" role="img" aria-label="Product photo placeholder"><span>{label}</span></div>
-}
 
 /** A price or other figure, set in the numeric face. */
 export function Num({ children, className }: { children: ReactNode; className?: string }) {

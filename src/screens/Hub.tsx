@@ -1,22 +1,18 @@
 import { catalog, data, sourceUrl, type CatalogItem } from '../data'
-import { useApp, type HubTab, type PriceRange } from '../state'
+import { useEffect, useState } from 'react'
+import { useApp, type PriceRange } from '../state'
+import { CHAPTERS, researchProgress } from '../lib/progress'
 import { autoGrid, blockClass } from '../lib/theme'
 import { affLabel } from '../components/Sheets'
 import { Icon } from '../components/Icon'
 import { PriorityFit } from '../components/Priorities'
-import { BackLink, Num, ProductShot, arrowNav, cx } from '../components/ui'
+import { BackLink, Num, arrowNav, cx } from '../components/ui'
+import { ProductArt } from '../components/ProductArt'
 import { nb, npr } from '../lib/format'
 
 const p = data.product
 const pr = data.pricing
 
-const CHAPTERS: [HubTab, string][] = [
-  ['summary', 'Is it good?'],
-  ['evidence', 'Who says so?'],
-  ['ownership', 'Will it last?'],
-  ['pricing', 'Is now the time?'],
-  ['community', 'What do owners say?'],
-]
 
 export function Hub() {
   const { s, go } = useApp()
@@ -30,6 +26,13 @@ function FullHub({ back }: { back: () => void }) {
   const priceNow = Number(p.price.replace(/,/g, ''))
   const priceWas = Number(p.was.replace(/,/g, ''))
   const pctOff = Math.round((1 - priceNow / priceWas) * 100)
+  const read = s.readTabs.xm5 ?? []
+  const progress = researchProgress(s, 'xm5')
+
+  // Opening a question counts as reading it; this drives "Pick up where you left off".
+  useEffect(() => {
+    if (!read.includes(s.tab)) set({ readTabs: { ...s.readTabs, xm5: [...read, s.tab] } })
+  }, [s.tab]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <main className="page" data-screen-label="Research Hub">
@@ -47,7 +50,7 @@ function FullHub({ back }: { back: () => void }) {
             <span className="tag tag--teal"><Icon name="down" size={14} />{pctOff}% below its 12-month high</span>
           </div>
         </div>
-        <ProductShot />
+        <ProductArt category="Headphones" label={`${p.brand} ${p.name}`} />
       </div>
       <div className="row">
         <button type="button" className="btn btn--dark" onClick={() => set({ sheet: 'retail' })}>See prices</button>
@@ -61,10 +64,13 @@ function FullHub({ back }: { back: () => void }) {
       <PriorityFit pid="xm5" category="Headphones" />
 
       <div className="chapter-bar">
+        <div className="chapter-bar__progress small muted" aria-live="polite">{progress.done} of {CHAPTERS.length} questions read</div>
         <div className="chapters" role="tablist" aria-label="Research questions" onKeyDown={arrowNav}>
           {CHAPTERS.map(([k, q]) => (
             <button key={k} type="button" role="tab" id={'tab-' + k} aria-selected={s.tab === k} aria-controls="hub-panel" tabIndex={s.tab === k ? 0 : -1}
-              className={cx('chapter', s.tab === k && 'is-on')} onClick={() => set({ tab: k })}>{q}</button>
+              className={cx('chapter', s.tab === k && 'is-on')} onClick={() => set({ tab: k })}>
+              {read.includes(k) && s.tab !== k && <Icon name="check" size={14} />}{q}{read.includes(k) && <span className="sr-only"> (read)</span>}
+            </button>
           ))}
         </div>
       </div>
@@ -93,7 +99,7 @@ function PreviewHub({ item, back }: { item: CatalogItem; back: () => void }) {
           <div className="hub-hero__meta"><span>{item.brand} · {item.cat}</span></div>
           {item.price && <div className="price-line"><Num className="price-line__now">रू {item.price}</Num></div>}
         </div>
-        <ProductShot />
+        <ProductArt category={item.cat} label={`${item.brand} ${item.name}`} />
       </div>
       <PriorityFit pid={item.id} category={item.cat} />
       <section className="panel panel--navy on-dark stack" style={{ marginTop: 16 }}>
@@ -277,6 +283,21 @@ function chartFor(range: PriceRange) {
   }
 }
 
+/** Where today's price sits against the last 12 months: low, typical (middle half) or high. */
+function priceStanding() {
+  const v = [...pr.history].sort((a, b) => a - b)
+  const q = (f: number) => { const i = (v.length - 1) * f, lo = Math.floor(i); return v[lo] + (v[Math.ceil(i)] - v[lo]) * (i - lo) }
+  const min = v[0], max = v[v.length - 1], t1 = q(0.25), t3 = q(0.75)
+  const today = Number(p.price.replace(/,/g, '')) / 1000
+  const pos = (x: number) => ((x - min) / (max - min)) * 100
+  const k = (x: number) => npr(Math.round(x * 2) * 500)
+  return {
+    word: today < t1 ? 'low' : today > t3 ? 'high' : 'typical',
+    band: { left: pos(t1), width: pos(t3) - pos(t1) }, today: pos(today),
+    min: k(min), max: k(max), t1: k(t1), t3: k(t3),
+  }
+}
+
 function Pricing() {
   const { s, set } = useApp()
   const drop = npr((Number(pr.high.replace(/,/g, '')) - Number(p.price.replace(/,/g, ''))))
@@ -287,6 +308,7 @@ function Pricing() {
         <span className="tag tag--neutral" style={{ background: 'var(--paper)' }}><Icon name="check" size={14} />{pr.signal}</span>
         <h2 className="timing__answer">Yes, mostly.</h2>
         <p className="timing__text"><Num>रू {drop}</Num> under its 12-month high. The all-time low was <Num>रू {pr.low}</Num> during {pr.lowWhen}, so it may dip again.</p>
+        <RangeMeter />
         <div className="chart-head">
           <h3 className="h4">Price over {c.span}</h3>
           <div className="range-tabs" role="tablist" aria-label="Price range" onKeyDown={arrowNav}>
@@ -336,7 +358,7 @@ function Pricing() {
       </section>
       <button type="button" className="alert-banner" onClick={() => set({ sheet: 'alert' })}>
         <div className="stack" style={{ gap: 4 }}>
-          <div className="h4">{s.alertSet ? `Alert set at रू ${npr(s.alertT)}. Change it` : 'Not ready? Save it and set a price alert'}</div>
+          <div className="h4">{!s.alertSet ? 'Not ready? Save it and set a price alert' : s.alertMode === 'drop' ? 'Alert set for any price drop. Change it' : `Alert set at रू ${npr(s.alertT)}. Change it`}</div>
           <div className="small" style={{ color: 'var(--on-dark)' }}>We’ll tell you when it hits your price. No other emails.</div>
         </div>
         <Icon name="arrowRight" size={26} />
@@ -345,15 +367,52 @@ function Pricing() {
   )
 }
 
+function RangeMeter() {
+  const r = priceStanding()
+  return (
+    <div className="meter">
+      <p className="h4">Today’s price is <span className="meter__word">{r.word}</span> for this product</p>
+      <div className="meter__track" role="img" aria-label={`Typical price is रू ${r.t1} to रू ${r.t3}. Today, रू ${p.price}, is ${r.word}.`}>
+        <span className="meter__band" style={{ left: r.band.left + '%', width: r.band.width + '%' }} />
+        <span className="meter__today" style={{ left: r.today + '%' }} />
+      </div>
+      <div className="meter__scale num small" aria-hidden>
+        <span>रू {r.min}</span><span>Typical रू {r.t1}–{r.t3}</span><span>रू {r.max}</span>
+      </div>
+      <p className="small">Based on prices tracked at 4 Nepali retailers over the last 12 months. Not a prediction.</p>
+    </div>
+  )
+}
+
 function HubCommunity() {
-  const { go } = useApp()
+  const { s, set, go, toast } = useApp()
+  const [q, setQ] = useState('')
+  const ask = () => {
+    if (!q.trim()) return
+    set({ questions: [q.trim(), ...s.questions] })
+    setQ('')
+    toast('Question posted. We’ll notify you when an owner answers')
+  }
   return (
     <>
       <div className="section-head" style={{ marginTop: 16, alignItems: 'center' }}>
         <h2 className="h2">What do owners say?</h2>
         <button type="button" className="btn btn--outline" onClick={() => go('review', { rDone: false })}>Own one? Write a review</button>
       </div>
+      <form className="ask" onSubmit={e => { e.preventDefault(); ask() }}>
+        <label htmlFor="ask-q" className="h4">Ask owners a question</label>
+        <p className="small muted">Questions go to the <Num>312</Num> verified owners of the WH-1000XM5. Most get an answer within a day.</p>
+        <textarea id="ask-q" className="textarea" rows={2} value={q} onChange={e => setQ(e.target.value)} placeholder="e.g. Do they get warm on long flights?" />
+        <div className="row"><button type="submit" className="btn btn--dark" disabled={!q.trim()} style={{ opacity: q.trim() ? 1 : 0.5 }}><Icon name="chat" size={18} />Ask owners</button></div>
+      </form>
       <div className="masonry">
+        {s.questions.map(text => (
+          <article key={text} className="card review-card card--quiet">
+            <div className="review-card__top"><span className="tag tag--amber">Your question</span><span className="muted">Just now</span></div>
+            <h3 className="h3">{text}</h3>
+            <div className="review-card__foot"><span className="row" style={{ gap: 6 }}><Icon name="clock" size={16} />Waiting for owners to answer</span></div>
+          </article>
+        ))}
         {data.reviews.map(c => (
           <article key={c.name} className="card review-card">
             <div className="review-card__top">

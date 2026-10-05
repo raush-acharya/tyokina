@@ -17,6 +17,15 @@ export function Decide() {
   return (
     <main className="page page--narrow" data-screen-label="Decision check">
       <BackLink onClick={() => go('hub', { tab: 'summary' })}>Back to research</BackLink>
+      {s.fromAlert && (
+        <div className="changed" role="status">
+          <Icon name="down" size={22} />
+          <div className="stack" style={{ gap: 2 }}>
+            <strong>The price dropped <Num>रू 6,000</Num> since you last looked.</strong>
+            <span className="small">It’s now <Num>रू {p.price}</Num>, the lowest in 12 months. Your priorities and notes are as you left them.</span>
+          </div>
+        </div>
+      )}
       <div className="page-head">
         <h1 className="display">Ready to<br />decide<span className="accent">?</span></h1>
         <p className="lede">{p.brand} {nb(p.name)} at <Num>रू {p.price}</Num>. Here’s how the evidence stacks up, and what’s still unknown.</p>

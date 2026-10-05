@@ -1,18 +1,22 @@
-import { catalog, data } from '../data'
+import { data } from '../data'
+import { search } from '../lib/search'
 import { useApp } from '../state'
 import { blockClass, stageClass } from '../lib/theme'
 import { Icon } from '../components/Icon'
 import { Num } from '../components/ui'
 import { nb } from '../lib/format'
+import { ProductArt } from '../components/ProductArt'
+import { researchProgress } from '../lib/progress'
 
 const POPULAR = ['Headphones', 'Laptops', 'Phones', 'TVs']
 
 export function Home() {
-  const { s, set, go, openProduct, openHubTab } = useApp()
+  const { s, set, go, openProduct, openHubTab, toast } = useApp()
   const ql = s.q.trim().toLowerCase()
 
-  const products = Object.values(catalog).filter(p => (p.brand + ' ' + p.name + ' ' + p.cat).toLowerCase().includes(ql))
-  const guides = data.guides.map((g, i) => ({ ...g, i })).filter(g => (g.t + ' ' + g.tag).toLowerCase().includes(ql))
+  const { products, guides, corrected } = search(ql)
+  // Remember a search once it leads somewhere.
+  const remember = () => { if (ql) set({ recent: [ql, ...s.recent.filter(r => r !== ql)].slice(0, 5) }) }
 
   return (
     <main className="page" data-screen-label="Home">
@@ -26,6 +30,13 @@ export function Home() {
             <Icon name={ql ? 'close' : 'search'} size={22} />
           </button>
         </form>
+        {!ql && s.recent.length > 0 && (
+          <div className="suggest">
+            <span className="small muted">Recent:</span>
+            {s.recent.map(r => <button key={r} type="button" className="chip" onClick={() => set({ q: r })}><Icon name="clock" size={16} />{r}</button>)}
+            <button type="button" className="link link--quiet" onClick={() => set({ recent: [] })}>Clear</button>
+          </div>
+        )}
         {!ql && (
           <div className="suggest">
             <span className="small muted">Popular:</span>
@@ -39,22 +50,27 @@ export function Home() {
           {products.length + guides.length === 0 ? (
             <div className="empty">
               <h2 className="h4">No products or guides match “{s.q.trim()}”</h2>
-              <p className="muted">Check the spelling, try a brand or a category, or browse what we cover.</p>
+              <p className="muted">Try a brand or a category, or browse what we cover. If it’s a product we don’t research yet, ask us to add it.</p>
               <div className="chip-row">
+                <button type="button" className="btn btn--dark" onClick={() => toast(`Thanks. We’ll tell you if we add “${s.q.trim()}”`)}>Request this product</button>
                 {POPULAR.map(c => <button key={c} type="button" className="chip" onClick={() => set({ q: c })}>{c}</button>)}
                 <button type="button" className="chip" onClick={() => go('explore')}>All categories</button>
               </div>
             </div>
           ) : (
             <>
+              {corrected && <p className="muted">No exact matches for “{s.q.trim()}”. Showing results for <button type="button" className="link" style={{ minHeight: 0 }} onClick={() => set({ q: corrected })}>{corrected}</button>.</p>}
               {products.length > 0 && (
                 <section className="results__group" aria-label="Products">
                   <h2 className="label">Products · <Num>{products.length}</Num></h2>
                   {products.map(r => (
-                    <button key={r.id} type="button" className="result-row" onClick={() => openProduct(r.id)}>
-                      <div>
-                        <div className="result-row__name">{r.brand} {nb(r.name)}</div>
-                        <div className="result-row__meta">{r.cat} · {r.note}</div>
+                    <button key={r.id} type="button" className="result-row" onClick={() => { remember(); openProduct(r.id) }}>
+                      <div className="result-row__main">
+                        <ProductArt category={r.cat} size="sm" />
+                        <div>
+                          <div className="result-row__name">{r.brand} {nb(r.name)}</div>
+                          <div className="result-row__meta">{r.cat} · {r.note}</div>
+                        </div>
                       </div>
                       <div className="result-row__nums">
                         {r.price && <Num>रू {r.price}</Num>}
@@ -68,7 +84,7 @@ export function Home() {
                 <section className="results__group" aria-label="Buying guides">
                   <h2 className="label">Buying guides</h2>
                   {guides.map(g => (
-                    <button key={g.t} type="button" className="result-row" onClick={() => go('guide', { guide: g.i })}>
+                    <button key={g.t} type="button" className="result-row" onClick={() => { remember(); go('guide', { guide: g.i }) }}>
                       <div>
                         <div className="result-row__name">{g.t}</div>
                         <div className="result-row__meta">{g.meta}</div>
@@ -86,8 +102,11 @@ export function Home() {
           <section className="section" aria-labelledby="continue-h">
             <h2 id="continue-h" className="h3">Pick up where you left off</h2>
             <div className="grid" style={{ '--min': '320px' } as React.CSSProperties}>
-              {data.continueR.map((c, i) => (
-                <button key={c.name} type="button" className="continue-card lift" onClick={() => i === 0 ? openHubTab('pricing') : openProduct(c.id)}>
+              {data.continueR.map(c0 => {
+                const live = c0.id === 'xm5' ? researchProgress(s, 'xm5') : null
+                const c = live ? { ...c0, pct: live.pct, step: live.step } : c0
+                return (
+                <button key={c.name} type="button" className="continue-card lift" onClick={() => live ? openHubTab(live.next) : openProduct(c.id)}>
                   <div className="continue-card__top">
                     <span className={'tag ' + stageClass[c.stage]}>{c.stage}</span>
                     <Icon name="arrowRight" />
@@ -100,7 +119,8 @@ export function Home() {
                     <div className="small muted">{c.step}</div>
                   </div>
                 </button>
-              ))}
+                )
+              })}
             </div>
           </section>
 

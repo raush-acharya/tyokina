@@ -79,6 +79,16 @@ function AlertSheet() {
   return (
     <Sheet title="Save and set a price alert" width={520} onClose={() => set({ sheet: null })}>
       <p className="small muted">{p.brand} {p.name} · today <Num>रू {p.price}</Num></p>
+      <div role="radiogroup" aria-label="Alert me when" className="mode" onKeyDown={arrowNav}>
+        {([['drop', 'Any price drop', 'Every time it gets cheaper'], ['below', 'Below a price', 'Only when it reaches your target']] as const).map(([k, t, d]) => (
+          <button key={k} type="button" role="radio" aria-checked={s.alertMode === k} tabIndex={s.alertMode === k ? 0 : -1}
+            className={cx('mode__opt', s.alertMode === k && 'is-on')} onClick={() => set({ alertMode: k })}>
+            <span className="mode__dot" aria-hidden />
+            <span><span className="mode__t">{t}</span><span className="small muted">{d}</span></span>
+          </button>
+        ))}
+      </div>
+      {s.alertMode === 'below' && <>
       <div className="stepper">
         <button type="button" className="stepper__btn" aria-label="Lower by रू 500" onClick={() => set({ alertT: Math.max(30000, s.alertT - 500) })}><Icon name="minus" /></button>
         <div className="stepper__value">
@@ -90,9 +100,10 @@ function AlertSheet() {
       <div className="chip-row">
         {ALERT_PRESETS.map(([v, t]) => <Chip key={v} on={s.alertT === v} onClick={() => set({ alertT: v })}>{t}</Chip>)}
       </div>
+      </>}
       <button type="button" className="block-cta" onClick={() => {
         set({ sheet: null, alertSet: true, saved: true, outcome: s.screen === 'decide' ? 'wait' : s.outcome })
-        toast('Saved. We’ll alert you at रू ' + npr(s.alertT))
+        toast(s.alertMode === 'drop' ? 'Saved. We’ll tell you whenever the price drops' : 'Saved. We’ll alert you at रू ' + npr(s.alertT))
       }}>Save to “Travel gear 2026” and set alert</button>
       <p className="small muted" style={{ textAlign: 'center' }}>It's fine to wait. Your research is saved.</p>
     </Sheet>

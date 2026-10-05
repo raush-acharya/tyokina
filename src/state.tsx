@@ -45,6 +45,16 @@ export interface AppState {
   rRec: string
   rDone: boolean
   priv: { pub: boolean; anon: boolean; checkins: boolean }
+  /** Research questions the buyer has opened, per product. */
+  readTabs: Record<string, HubTab[]>
+  /** Searches that led somewhere, newest first. */
+  recent: string[]
+  /** Price alert: any drop, or only below the target price. */
+  alertMode: 'drop' | 'below'
+  /** Questions the buyer has asked owners. */
+  questions: string[]
+  /** Arrived from a price-drop notification (Decision check shows what changed). */
+  fromAlert: boolean
 }
 
 function screenFromHash(): Screen | null {
@@ -60,6 +70,7 @@ const initial = (): AppState => ({
   feedF: 'All', voted: [], noteF: 'All', stageF: 'All', guide: 0, picks: [0, 1],
   stars: 4, rChips: ['Battery'], rText: '', rRec: 'Yes', rDone: false,
   priv: { pub: true, anon: false, checkins: true },
+  readTabs: { xm5: ['summary', 'evidence'] }, recent: ['macbook air', 'oled tv'], alertMode: 'below', questions: [], fromAlert: false,
 })
 
 interface AppApi {
@@ -82,13 +93,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const set = useCallback((patch: Partial<AppState>) => setS(prev => ({ ...prev, ...patch })), [])
 
   const go = useCallback((screen: Screen, extra?: Partial<AppState>) => {
-    setS(prev => ({ ...prev, prev: prev.screen, screen, sheet: null, ...extra }))
+    setS(prev => ({ ...prev, prev: prev.screen, screen, sheet: null, fromAlert: false, ...extra }))
     window.scrollTo(0, 0)
   }, [])
 
+  // Question tabs only exist for the fully researched product (the XM5), so this always opens it.
   const openHubTab = useCallback((tab: HubTab, highlight = 0) => {
     if (!highlight) window.scrollTo(0, 0)
-    setS(prev => ({ ...prev, prev: prev.screen === 'hub' ? prev.prev : prev.screen, screen: 'hub', tab, hl: highlight, sheet: null }))
+    setS(prev => ({ ...prev, prev: prev.screen === 'hub' ? prev.prev : prev.screen, screen: 'hub', pid: 'xm5', tab, hl: highlight, sheet: null }))
     window.clearTimeout(hlTimer.current)
     if (highlight) {
       requestAnimationFrame(() => document.getElementById('source-' + highlight)?.scrollIntoView({ behavior: 'smooth', block: 'center' }))

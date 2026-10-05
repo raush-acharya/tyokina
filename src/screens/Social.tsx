@@ -84,7 +84,7 @@ const NOTE_FILTER: Record<NoteKind, string> = { Price: 'Prices', Reply: 'Replies
 const DOT: Record<NoteKind, string> = { Price: 'price', 'Check-in': 'checkin', Reply: 'other', Update: 'other', Community: 'other' }
 
 export function Notifications() {
-  const { s, set, go, openProduct, openHubTab } = useApp()
+  const { s, set, go, openProduct } = useApp()
   const notes = data.notifications.filter(n => s.noteF === 'All' || NOTE_FILTER[n.k] === s.noteF)
   return (
     <main className="page page--read" data-screen-label="Notifications">
@@ -95,7 +95,7 @@ export function Notifications() {
       <ul className="divided">
         {notes.map(n => (
           <li key={n.t}>
-            <button type="button" className="note" onClick={() => n.go === 'hub' ? (n.pid === 'xm5' ? openHubTab('pricing') : openProduct(n.pid ?? 'xm5')) : go(n.go, n.go === 'review' ? { rDone: false } : {})}>
+            <button type="button" className="note" onClick={() => n.k === 'Price' ? go('decide', { fromAlert: true }) : n.go === 'hub' ? openProduct(n.pid ?? 'xm5') : go(n.go, n.go === 'review' ? { rDone: false } : {})}>
               <span className={'note__dot note__dot--' + DOT[n.k]} aria-hidden />
               <div className="note__body">
                 <span className="small muted">{n.k}</span>

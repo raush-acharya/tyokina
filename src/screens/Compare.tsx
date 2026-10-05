@@ -1,16 +1,43 @@
-import { data, xm5Meets, type Spec } from '../data'
+import { useEffect, useRef, useState } from 'react'
+import { catalog, data, xm5Meets, type Spec } from '../data'
 import { strongestIdx } from '../lib/compare'
 import { blockClass } from '../lib/theme'
 import { useApp } from '../state'
 import { Icon } from '../components/Icon'
-import { cx } from '../components/ui'
+import { ProductArt } from '../components/ProductArt'
+import { Num, cx } from '../components/ui'
 import { nb } from '../lib/format'
+
+/** Plain-language help for spec terms buyers may not know. */
+const SPEC_INFO: Record<string, string> = {
+  'Noise cancellation': 'Lab score out of 10 for how much outside noise is blocked. Higher is quieter.',
+  'Battery': 'Hours of playback with noise cancellation on, from lab tests.',
+  'Folds flat': 'Whether the ear cups fold so the headphones lie flat in a bag.',
+  'Multipoint': 'Stays connected to two devices at once, like your laptop and phone.',
+  'Hi-res audio': 'LDAC sends more audio detail over Bluetooth. It works with most Android phones, not iPhones.',
+  'Reliability (1 yr+)': 'How owners rate the product after a year of use, out of 5.',
+  'Top issue': 'The problem owners report most often after a year.',
+  'Verified owners': 'Owners who linked a receipt or retailer order.',
+  'Vs 12-month high': 'How far today’s price is below the highest price of the last year.',
+  'Evidence score': 'How much independent evidence backs the product, out of 10.',
+  'Warranty in Nepal': 'Warranty from authorised dealers. Grey imports usually have none.',
+}
 
 export function Compare() {
   const { s, set, go, openProduct, toast } = useApp()
+  const [info, setInfo] = useState<string | null>(null)
+  const [adding, setAdding] = useState(false)
+  const [addQ, setAddQ] = useState('')
+  const [stuck, setStuck] = useState(false)
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const barRef = useRef<HTMLDivElement>(null)
+  const headRef = useRef<HTMLDivElement>(null)
+  const tableRef = useRef<HTMLDivElement>(null)
+
   const cols = s.cmp.map(id => data.compare.find(c => c.id === id)!).filter(Boolean)
   const colIdx = cols.map(c => data.compare.indexOf(c))
   const gridCols = { gridTemplateColumns: `repeat(${cols.length},minmax(0,1fr))` }
+  const tableVars = { '--n': cols.length } as React.CSSProperties
   const sameCount = data.specs.filter(x => x.same).length
 
   // Rows tied to the buyer's headphone priorities are marked and listed first in their group.
@@ -24,6 +51,23 @@ export function Compare() {
   }
   for (const g of groups) g.rows.sort((a, b) => Number(mine.has(b.k)) - Number(mine.has(a.k)))
 
+  // Keep product names in view once the column headers scroll away.
+  useEffect(() => {
+    const onScroll = () => {
+      const head = headRef.current?.getBoundingClientRect(), table = tableRef.current?.getBoundingClientRect()
+      setStuck(!!head && !!table && head.bottom < 0 && table.bottom > 120)
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+  const syncBar = () => { if (barRef.current && scrollRef.current) barRef.current.scrollLeft = scrollRef.current.scrollLeft }
+
+  // Same-category candidates for the add picker; only some have comparison data yet.
+  const ql = addQ.trim().toLowerCase()
+  const candidates = Object.values(catalog)
+    .filter(c => c.cat === 'Headphones' && !s.cmp.includes(c.id))
+    .filter(c => (c.brand + ' ' + c.name).toLowerCase().includes(ql))
+
   return (
     <main className="page" data-screen-label="Compare">
       <div className="page-head">
@@ -31,10 +75,23 @@ export function Compare() {
         <p className="lede">No winners and no “recommended”. Each one suits a different buyer, so we only show where they differ.</p>
       </div>
 
-      <div className="compare-scroll">
-        <div className="compare-table" role="table" aria-label="Product comparison" style={{ '--n': cols.length } as React.CSSProperties}>
-          <div className="compare-row compare-row--head" role="row">
-            <span role="columnheader" className="label" style={{ alignSelf: 'end' }}>Spec</span>
+      <div className="cmp-sticky" aria-hidden>
+        <div ref={barRef} className={cx('cmp-sticky__bar', stuck && 'is-on')}>
+          <div className="compare-table" style={tableVars}>
+            <div className="compare-row compare-row--mini">
+              <span />
+              <div className="compare-cells" style={gridCols}>
+                {cols.map((c, k) => <span key={c.id} className={blockClass(k) + ' cmp-mini'}>{c.brand} {nb(c.name)}</span>)}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="compare-scroll" ref={scrollRef} onScroll={syncBar}>
+        <div className="compare-table" role="table" aria-label="Product comparison" style={tableVars} ref={tableRef}>
+          <div className="compare-row compare-row--head" role="row" ref={headRef}>
+            <span role="columnheader" className="label" style={{ justifyContent: 'flex-end' }}>Spec</span>
             <div className="compare-cells" style={gridCols}>
               {cols.map((c, k) => (
                 <div key={c.id} role="columnheader" className={blockClass(k) + ' cmp-col'}>
@@ -57,9 +114,20 @@ export function Compare() {
               {gr.rows.map(r => {
                 const vals = colIdx.map(i => r.v[i])
                 const strongest = strongestIdx(r.k, vals)
+                const help = SPEC_INFO[r.k]
                 return (
                   <div key={r.k} className="compare-row" role="row">
-                    <span role="rowheader" className="compare-row__k">{r.k}{mine.has(r.k) && <span className="yours">Your priority</span>}</span>
+                    <span role="rowheader" className="compare-row__k">
+                      <span className="compare-row__label">
+                        {r.k}
+                        {help && (
+                          <button type="button" className="info-btn" aria-expanded={info === r.k} aria-label={`What does ${r.k} mean?`}
+                            onClick={() => setInfo(info === r.k ? null : r.k)}><Icon name="info" size={16} /></button>
+                        )}
+                      </span>
+                      {mine.has(r.k) && <span className="yours">Your priority</span>}
+                      {info === r.k && <span className="spec-help small">{help}</span>}
+                    </span>
                     <div className="compare-cells" style={gridCols}>
                       {vals.map((v, j) => (
                         <span key={j} role="cell" className={cx('cmp-cell num', j === strongest && 'is-strongest')}>
@@ -81,9 +149,38 @@ export function Compare() {
           {s.showSame ? 'Hide identical specs' : `Show ${sameCount} identical specs`}
         </button>
         {cols.length < 3 && (
-          <button type="button" className="pill-btn" style={{ borderStyle: 'dashed' }} onClick={() => set({ cmp: data.compare.map(c => c.id) })}><Icon name="plus" size={18} />Add a product</button>
+          <button type="button" className="pill-btn" style={{ borderStyle: 'dashed' }} aria-expanded={adding} onClick={() => { setAdding(!adding); setAddQ('') }}>
+            <Icon name="plus" size={18} />Add a product
+          </button>
         )}
       </div>
+
+      {adding && cols.length < 3 && (
+        <section className="card adder" aria-labelledby="add-h">
+          <div className="section-head" style={{ alignItems: 'center' }}>
+            <h2 id="add-h" className="h4">Add headphones to compare</h2>
+            <button type="button" className="icon-btn" aria-label="Close" onClick={() => setAdding(false)}><Icon name="close" /></button>
+          </div>
+          <label className="sr-only" htmlFor="add-q">Search headphones</label>
+          <input id="add-q" className="adder__input" value={addQ} onChange={e => setAddQ(e.target.value)} placeholder="Search headphones" autoFocus />
+          <ul className="divided">
+            {candidates.map(c => {
+              const ready = data.compare.some(x => x.id === c.id)
+              return (
+                <li key={c.id}>
+                  <button type="button" className="adder__row" disabled={!ready}
+                    onClick={() => { set({ cmp: [...s.cmp, c.id] }); setAdding(false); toast(`Added ${c.brand} ${c.name}`) }}>
+                    <ProductArt category={c.cat} size="sm" />
+                    <span className="adder__name"><b>{c.brand} {nb(c.name)}</b><span className="small muted">{ready ? <>रू <Num>{c.price}</Num></> : 'No comparison data yet'}</span></span>
+                    {ready && <Icon name="plus" />}
+                  </button>
+                </li>
+              )
+            })}
+            {candidates.length === 0 && <li className="small muted" style={{ padding: '12px 0' }}>No other headphones match “{addQ.trim()}”.</li>}
+          </ul>
+        </section>
+      )}
 
       <section className="panel panel--navy on-dark section">
         <h2 className="h3">The trade-offs in plain words</h2>
