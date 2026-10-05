@@ -5,7 +5,7 @@ import { blockClass, stageClass } from '../lib/theme'
 import { Icon } from '../components/Icon'
 import { Num } from '../components/ui'
 import { nb } from '../lib/format'
-import { ProductArt } from '../components/ProductArt'
+import { ProductPhoto } from '../components/ProductPhoto'
 import { researchProgress } from '../lib/progress'
 
 const POPULAR = ['Headphones', 'Laptops', 'Phones', 'TVs']
@@ -66,7 +66,7 @@ export function Home() {
                   {products.map(r => (
                     <button key={r.id} type="button" className="result-row" onClick={() => { remember(); openProduct(r.id) }}>
                       <div className="result-row__main">
-                        <ProductArt category={r.cat} size="sm" />
+                        <ProductPhoto pid={r.id} name={`${r.brand} ${r.name}`} size="sm" />
                         <div>
                           <div className="result-row__name">{r.brand} {nb(r.name)}</div>
                           <div className="result-row__meta">{r.cat} · {r.note}</div>

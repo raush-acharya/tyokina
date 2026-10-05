@@ -4,7 +4,7 @@ import { strongestIdx } from '../lib/compare'
 import { blockClass } from '../lib/theme'
 import { useApp } from '../state'
 import { Icon } from '../components/Icon'
-import { ProductArt } from '../components/ProductArt'
+import { ProductPhoto } from '../components/ProductPhoto'
 import { Num, cx } from '../components/ui'
 import { nb } from '../lib/format'
 
@@ -170,7 +170,7 @@ export function Compare() {
                 <li key={c.id}>
                   <button type="button" className="adder__row" disabled={!ready}
                     onClick={() => { set({ cmp: [...s.cmp, c.id] }); setAdding(false); toast(`Added ${c.brand} ${c.name}`) }}>
-                    <ProductArt category={c.cat} size="sm" />
+                    <ProductPhoto pid={c.id} name={`${c.brand} ${c.name}`} size="sm" />
                     <span className="adder__name"><b>{c.brand} {nb(c.name)}</b><span className="small muted">{ready ? <>रू <Num>{c.price}</Num></> : 'No comparison data yet'}</span></span>
                     {ready && <Icon name="plus" />}
                   </button>

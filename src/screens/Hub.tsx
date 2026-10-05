@@ -7,7 +7,7 @@ import { affLabel } from '../components/Sheets'
 import { Icon } from '../components/Icon'
 import { PriorityFit } from '../components/Priorities'
 import { BackLink, Num, arrowNav, cx } from '../components/ui'
-import { ProductArt } from '../components/ProductArt'
+import { ProductPhoto } from '../components/ProductPhoto'
 import { nb, npr } from '../lib/format'
 
 const p = data.product
@@ -50,7 +50,7 @@ function FullHub({ back }: { back: () => void }) {
             <span className="tag tag--teal"><Icon name="down" size={14} />{pctOff}% below its 12-month high</span>
           </div>
         </div>
-        <ProductArt category="Headphones" label={`${p.brand} ${p.name}`} />
+        <ProductPhoto pid="xm5" name={`${p.brand} ${p.name}`} />
       </div>
       <div className="row">
         <button type="button" className="btn btn--dark" onClick={() => set({ sheet: 'retail' })}>See prices</button>
@@ -99,7 +99,7 @@ function PreviewHub({ item, back }: { item: CatalogItem; back: () => void }) {
           <div className="hub-hero__meta"><span>{item.brand} · {item.cat}</span></div>
           {item.price && <div className="price-line"><Num className="price-line__now">रू {item.price}</Num></div>}
         </div>
-        <ProductArt category={item.cat} label={`${item.brand} ${item.name}`} />
+        <ProductPhoto pid={item.id} name={`${item.brand} ${item.name}`} />
       </div>
       <PriorityFit pid={item.id} category={item.cat} />
       <section className="panel panel--navy on-dark stack" style={{ marginTop: 16 }}>

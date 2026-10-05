@@ -5,7 +5,7 @@ import { npr } from '../lib/format'
 import { useApp, type AppState } from '../state'
 import { Icon } from '../components/Icon'
 import { BackLink, ChipRow, Num, cx } from '../components/ui'
-import { ProductArt } from '../components/ProductArt'
+import { ProductPhoto } from '../components/ProductPhoto'
 
 export function Saved() {
   const { s, set, go, openProduct } = useApp()
@@ -203,7 +203,7 @@ export function Guide() {
                 <div key={c.id} className="card guide-product">
                   <button type="button" aria-pressed={on} aria-label={`Add ${c.brand} ${c.name} to the comparison`} className={cx('pick', on && 'is-on')}
                     onClick={() => set({ picks: on ? s.picks.filter(x => x !== i) : [...s.picks, i] })}><Icon name={on ? 'check' : 'plus'} /></button>
-                  <ProductArt category="Headphones" size="sm" />
+                  <ProductPhoto pid={c.id} name={`${c.brand} ${c.name}`} size="sm" />
                   <div className="guide-product__body">
                     <span className="small muted">{c.brand} · <Num>रू {c.price}</Num></span>
                     <span className="h3">{c.name}</span>
