@@ -111,7 +111,10 @@ export function Home() {
                     <span className={'tag ' + stageClass[c.stage]}>{c.stage}</span>
                     <Icon name="arrowRight" />
                   </div>
-                  <div className="continue-card__name">{nb(c.name)}</div>
+                  <div className="continue-card__head">
+                    <ProductPhoto pid={c.id} name={c.name} size="sm" />
+                    <div className="continue-card__name">{nb(c.name)}</div>
+                  </div>
                   <div className="stack" style={{ gap: 8 }}>
                     <div className="progress" role="progressbar" aria-valuenow={c.pct} aria-valuemin={0} aria-valuemax={100} aria-label={`${c.name}: research ${c.pct}% done`}>
                       <div className="progress__fill" style={{ width: c.pct + '%' }} />
@@ -132,7 +135,10 @@ export function Home() {
             <div className="grid" style={{ '--min': '240px', gap: 12 } as React.CSSProperties}>
               {data.drops.map(d => (
                 <button key={d.name} type="button" className="drop-card" onClick={() => openProduct(d.id)}>
-                  <div className="drop-card__name">{nb(d.name)}</div>
+                  <div className="drop-card__head">
+                    <ProductPhoto pid={d.id} name={d.name} size="sm" />
+                    <div className="drop-card__name">{nb(d.name)}</div>
+                  </div>
                   <div className="drop-card__nums"><Num className="drop-card__price">रू {d.price}</Num><span className="drop-card__delta"><Num>{d.d}</Num></span></div>
                   <div className="small muted">{d.note}</div>
                 </button>
@@ -150,7 +156,10 @@ export function Home() {
                 <button key={t.name} type="button" className={blockClass(i) + ' trend-card lift'} onClick={() => openProduct(t.id)}>
                   <div className="trend-card__top"><span>{t.cat}</span><Num>रू {t.price}</Num></div>
                   <div>
-                    <div className="trend-card__score">{t.score}<small>evidence score</small></div>
+                    <div className="trend-card__row">
+                      <ProductPhoto pid={t.id} name={`${t.brand} ${t.name}`} size="sm" />
+                      <div className="trend-card__score">{t.score}<small>evidence score</small></div>
+                    </div>
                     <div className="trend-card__name">{t.brand} {nb(t.name)}</div>
                     <div className="small">{t.note}</div>
                   </div>

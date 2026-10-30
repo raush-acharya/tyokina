@@ -26,7 +26,7 @@ A published preview, a single-file build, lives at https://claude.ai/artifact/62
 - **Compare:** no winners. The strongest value per row gets a neutral mint "Strongest in that row" pill, with no star and no "best" wording.
 - **Tweaks:** the design's Mood / Hub layout / Voice controls are fixed to Loud, Chapters and Questions, and the switches were removed.
 - **Priorities:** per category, at most 3, asked in context on the Research Hub, editable on the Decision check, and surfaced first in Compare ("Your priority"). Not on Home.
-- **Photos:** no illustrations. `ProductPhoto` shows a credited photo (`src/photos.ts`) or a plain "Photo coming soon" frame. Photos should come from Wikimedia Commons with author + licence credit, exact models only. This was blocked because the org's cloud environment only allows github.com, so `photos.ts` is empty.
+- **Product images:** nine AI-generated studio-style images (made with ChatGPT's image tool), one per catalog product, in `src/assets/products/*.webp` (800×800, 13–38 KB, sharp at 2x for both the 340px hero and the 64px thumbnail) and mapped in `src/photos.ts`. They are illustrations, not photos of the exact units, so the large version carries the caption "AI-generated illustration, not a photo of the exact unit" (honest-about-what-we-know). They show on the Research Hub (full and preview pages), search results, the compare picker, and the Home cards (pick up where you left off, price drops, trending). Products with no image still get a plain frame.
 - **Style rules followed (Impeccable skill):** no eyebrow labels above headings, no meaningless 01/02 numbering, monospace only for numbers, an authored SVG icon set (`src/components/Icon.tsx`) instead of unicode glyphs, no coloured left borders, no nested cards.
 
 ## What's built
@@ -45,7 +45,7 @@ Accessibility: skip link, focus held in sheets and returned on close, arrow keys
 1. Warranty and seller type per retailer (authorised dealer vs grey import, a big deal in Nepal), plus total price with delivery.
 2. AI-summary trust: mark uncited sentences, and add topic chips ("Battery", "Comfort") that filter owner reviews.
 3. Dark mode.
-4. Real product photos once Wikimedia access exists (`commons.wikimedia.org`, `upload.wikimedia.org`).
+4. Swap the AI-generated images for real, credited photos (Wikimedia Commons, exact models, author + licence) once access exists (`commons.wikimedia.org`, `upload.wikimedia.org`). Keep the 800×800 square WebP convention.
 
 ## Repo map
 
