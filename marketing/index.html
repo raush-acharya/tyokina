@@ -1,0 +1,733 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TyoKina — Less searching. Less guessing.</title>
+<meta name="description" content="TyoKina brings product research for big purchases in Nepal into one place, so you can decide with confidence.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ROUGH DIRECTION DRAFT. Tokens mirror src/styles.css so the site and the app share one identity. */
+:root{
+  --paper:#FAFAF7;--surface:#fff;--ink:#0C0E1A;--muted:#4A5273;--line:#E2E6F3;--tint:#EEF0F9;
+  --navy:#1B2D6E;--on-dark:#C9CEEA;--amber:#F59E0B;--amber-tint:#FEF3C7;
+  --teal:#00BFA5;--teal-tint:#D9F7F2;--teal-ink:#00695C;--red:#B91C1C;--red-tint:#FDE2E2;
+  --sans:Outfit,'Avenir Next','Segoe UI',system-ui,sans-serif;--mono:'DM Mono',ui-monospace,Menlo,monospace;
+  --gutter:clamp(18px,5vw,64px);--ease:cubic-bezier(.16,1,.3,1);
+  --shadow:0 30px 60px -24px rgba(12,14,26,.4);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.5;overflow-x:hidden}
+img{max-width:100%;display:block}
+a{color:inherit}
+.skip{position:absolute;left:-999px}.skip:focus{left:12px;top:12px;background:var(--ink);color:#fff;padding:10px 14px;border-radius:10px;z-index:99}
+:focus-visible{outline:3px solid var(--navy);outline-offset:3px}
+.num{font-family:var(--mono)}
+.q{color:var(--amber)}
+.wrap{padding-inline:var(--gutter);max-width:1360px;margin-inline:auto}
+h1,h2,h3{margin:0;font-weight:800;letter-spacing:-.035em;line-height:.98}
+.xl{font-size:clamp(2.6rem,8.4vw,7.4rem)}
+.lg{font-size:clamp(2.2rem,5.6vw,4.8rem)}
+.md{font-size:clamp(1.7rem,3.4vw,2.8rem);letter-spacing:-.025em}
+p{margin:0}
+.lead{font-size:clamp(1.05rem,1.6vw,1.35rem);color:var(--muted);max-width:34em}
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+.d1{transition-delay:.12s}.d2{transition-delay:.24s}.d3{transition-delay:.36s}
+
+/* nav */
+.nav{position:fixed;inset:0 0 auto 0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:10px var(--gutter);pointer-events:none;background:rgba(250,250,247,.82);backdrop-filter:blur(10px)}
+.logo{pointer-events:auto;font-weight:800;font-size:1.35rem;letter-spacing:-.03em;text-decoration:none;mix-blend-mode:normal}
+.logo b{color:var(--amber)}
+.btn{pointer-events:auto;display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:0 22px;border-radius:999px;background:var(--ink);color:#fff;font:600 1rem var(--sans);text-decoration:none;border:0;cursor:pointer;transition:transform .3s var(--ease),background .3s}
+.btn:hover{transform:translateY(-2px) scale(1.02)}
+.btn.amber{background:var(--amber);color:var(--ink)}
+.btn.big{min-height:64px;padding:0 38px;font-size:1.25rem}
+.btn span{transition:transform .3s var(--ease)}.btn:hover span{transform:translateX(4px)}
+
+/* 0 hero */
+.hero{min-height:100svh;display:grid;align-content:center;padding:120px var(--gutter) 80px;position:relative;overflow:hidden}
+.hero h1{max-width:13ch}.hero h1,.hero .lead{position:relative;z-index:1}.rot{white-space:nowrap}
+.hero .lead{margin-top:28px}
+.rot{display:inline-block;transition:opacity .35s,transform .35s var(--ease)}.rot.out{opacity:0;transform:translateY(-.3em)}
+.ghost{transition:opacity .35s,transform .6s var(--ease)}.ghost.out{opacity:0}
+.cue{position:absolute;bottom:28px;left:var(--gutter);display:flex;gap:12px;align-items:center;font-size:.9rem;color:var(--muted)}
+.cue i{width:2px;height:40px;background:linear-gradient(var(--ink),transparent);animation:cue 2s infinite}
+@keyframes cue{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+.ghost{position:absolute;right:calc(var(--gutter) * -.5);top:14%;width:min(46vw,520px);opacity:.9;transform:rotate(-6deg);filter:drop-shadow(0 40px 40px rgba(12,14,26,.18))}
+.ghost-note{position:absolute;right:var(--gutter);bottom:18%;background:var(--amber-tint);padding:10px 16px;border-radius:14px;font-size:.95rem;font-weight:500;transform:rotate(3deg)}
+
+/* 1 chaos (pinned) */
+.chaos{height:520vh;position:relative;background:var(--ink);color:#fff}
+.pin{position:sticky;top:0;height:100svh;overflow:hidden;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr);gap:clamp(12px,3vw,48px);align-items:center;padding:0 var(--gutter)}
+.cap small{font-size:.95rem;color:var(--on-dark);letter-spacing:.02em}
+.cap h2{font-size:clamp(1.9rem,4.4vw,3.8rem);margin:14px 0 22px;min-height:3.1em}
+.clock{display:flex;gap:24px;align-items:baseline;color:var(--on-dark);font-size:.95rem}
+.clock .num{font-size:clamp(1.6rem,3vw,2.4rem);color:#fff}
+.clock .tabs-n{color:var(--amber)}
+.bar{height:4px;background:#ffffff22;border-radius:4px;margin-top:22px;max-width:360px}.bar i{display:block;height:100%;width:0;background:var(--amber);border-radius:4px}
+.stage{position:relative;height:min(76svh,640px);container-type:inline-size}
+.win{position:absolute;width:56cqw;background:#fff;color:var(--ink);border-radius:2.2cqw;box-shadow:0 3cqw 6cqw -2cqw #000a;overflow:hidden;font-size:1.55cqw;opacity:0;transform:translateY(40px) scale(.9) rotate(var(--r));transition:opacity .6s var(--ease),transform .7s var(--ease)}
+.win.on{opacity:1;transform:translateY(0) scale(1) rotate(var(--r))}
+.win .tb{display:flex;align-items:center;gap:.8cqw;padding:1cqw 1.4cqw;background:var(--tint);font-size:1.3cqw;color:var(--muted)}
+.win .tb i{width:1cqw;height:1cqw;border-radius:50%;background:#c3c9e4}
+.win .tb u{margin-left:1cqw;text-decoration:none;background:#fff;border-radius:99px;padding:.3cqw 1.4cqw;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.win .bd{padding:1.6cqw 1.8cqw;line-height:1.35}
+.win .bd b{display:block}
+.win .row{display:flex;justify-content:space-between;gap:1cqw;padding:.6cqw 0;border-bottom:1px solid var(--line)}
+.stars{color:var(--amber)}
+.w1{--r:-3deg;left:0;top:2%}.w2{--r:2.5deg;left:36cqw;top:0}.w3{--r:-1.5deg;left:6cqw;top:24%}
+.w4{--r:3deg;left:38cqw;top:22%}.w5{--r:-3.5deg;left:2cqw;top:46%}.w6{--r:2deg;left:34cqw;top:44%}
+.w7{--r:-2deg;left:10cqw;top:62%}.w8{--r:4deg;left:40cqw;top:60%}
+.gpt .bd{background:#f4f4f1}.gpt p{background:#fff;border-radius:1cqw;padding:1cqw;margin-top:.8cqw}
+.mid{width:60cqw}
+
+/* 2 problem */
+.problem{padding:clamp(90px,16vw,200px) 0;background:var(--paper)}
+.fr{display:flex;flex-wrap:wrap;gap:10px 12px;margin:44px 0 0}
+.fr li{list-style:none}
+.pill{display:inline-block;padding:12px 20px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-weight:500;font-size:clamp(1rem,1.5vw,1.2rem);transform:rotate(var(--r,0));transition:transform .4s var(--ease),background .3s}
+.pill:hover{background:var(--amber-tint);transform:rotate(0) scale(1.04)}
+.quote{margin-top:clamp(70px,10vw,140px);max-width:16em}
+.quote em{font-style:normal;color:var(--muted)}
+
+/* 3 turn */
+.turn{background:var(--navy);color:#fff;min-height:140svh;position:relative}
+.turn .pin2{position:sticky;top:0;min-height:100svh;display:grid;place-items:center;text-align:center;padding:0 var(--gutter);overflow:hidden}
+.turn .what{opacity:var(--a,1);transform:translateY(calc((1 - var(--a,1)) * -30px));transition:none}
+.turn .meet{position:absolute;inset:0;display:grid;place-content:center;gap:22px;justify-items:center;padding:0 var(--gutter);opacity:var(--b,0);transform:scale(calc(.94 + var(--b,0) * .06))}
+.turn .wordmark{font-size:clamp(4rem,17vw,15rem);font-weight:800;letter-spacing:-.06em;line-height:.9}
+.turn .wordmark b{color:var(--amber)}
+.turn .lead{color:var(--on-dark);margin-inline:auto}
+.orb{position:absolute;width:70vmin;height:70vmin;border-radius:50%;background:radial-gradient(circle,#3a52b5 0%,transparent 65%);opacity:calc(var(--b,0) * .8);pointer-events:none}
+
+/* 4 before/after */
+.ba{padding:clamp(80px,12vw,160px) 0}
+.compare{position:relative;margin-top:44px;border-radius:32px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow);height:clamp(430px,62vw,620px);--p:50}
+.side{position:absolute;inset:0;padding:clamp(18px,3vw,40px)}
+.side h3{font-size:clamp(1.3rem,2.4vw,2rem);margin-bottom:16px}
+.without{background:#E9E6DE;clip-path:inset(0 calc(100% - var(--p) * 1%) 0 0);z-index:2}
+.with{background:var(--teal-tint);z-index:1;display:flex;flex-direction:column}
+.with h3{text-align:right}
+.mess{position:relative;height:calc(100% - 50px)}
+.mess span{position:absolute;background:#fff;border-radius:12px;padding:10px 14px;font-size:clamp(.78rem,1.2vw,1rem);box-shadow:0 8px 20px -10px #0006;transform:rotate(var(--r))}
+.mess .tabs{left:0;right:0;top:0;display:flex;gap:4px;background:none;box-shadow:none;padding:0}
+.mess .tabs i{flex:1;height:22px;border-radius:8px 8px 0 0;background:#fff;opacity:.8;min-width:0}
+.tidy{background:#fff;border-radius:22px;padding:clamp(14px,2vw,26px);margin-left:auto;width:min(100%,560px);box-shadow:0 20px 40px -20px #0005}
+.tidy .tabsr{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.chip{padding:7px 13px;border-radius:99px;background:var(--tint);font-size:.85rem;font-weight:500}
+.chip.on{background:var(--amber);}
+.tidy .meter{height:10px;border-radius:9px;background:linear-gradient(90deg,var(--teal),var(--amber-tint) 50%,var(--red-tint));position:relative;margin:12px 0 6px}
+.tidy .meter i{position:absolute;left:24%;top:-5px;width:20px;height:20px;border-radius:50%;background:var(--ink);border:3px solid #fff}
+.tidy .rows div{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:.95rem}
+.handle{position:absolute;top:0;bottom:0;left:calc(var(--p) * 1%);width:4px;background:var(--ink);z-index:4;transform:translateX(-2px);pointer-events:none}
+.handle::after{content:"↔";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:48px;height:48px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:1.3rem}
+.compare input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:ew-resize;z-index:5;margin:0}
+.compare:focus-within .handle::after{outline:3px solid var(--amber);outline-offset:3px}
+.pts{display:grid;grid-template-columns:1fr 1fr;gap:clamp(18px,4vw,60px);margin-top:36px}
+.pts ul{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.pts li{padding-left:30px;position:relative}
+.pts li::before{content:"✕";position:absolute;left:0;color:var(--red);font-weight:700}
+.pts .yes li::before{content:"✓";color:var(--teal-ink)}
+.pts h4{margin:0 0 12px;font-size:1.1rem}
+
+/* 5 how */
+.how{background:var(--tint);padding:clamp(80px,12vw,160px) 0}
+.how-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,6vw,100px);margin-top:50px;align-items:start}
+.steps{display:grid;gap:0}
+.step{min-height:70svh;display:flex;flex-direction:column;justify-content:center;opacity:.28;transition:opacity .5s}
+.step.act{opacity:1}
+.step .n{font:500 .95rem var(--mono);color:var(--muted)}
+.step h3{margin:10px 0 12px}
+.phone-wrap{position:sticky;top:6svh;height:88svh;display:grid;place-items:center}
+.phone{width:min(100%,340px);aspect-ratio:9/18.5;background:var(--ink);border-radius:44px;padding:10px;box-shadow:var(--shadow)}
+.scr{position:relative;height:100%;background:var(--paper);border-radius:34px;overflow:hidden}
+.pg{position:absolute;inset:0;padding:22px 16px;opacity:0;transform:translateY(16px);transition:opacity .5s var(--ease),transform .5s var(--ease);font-size:.82rem}
+.pg.on{opacity:1;transform:none}
+.pg h4{margin:0 0 10px;font-size:1.15rem;letter-spacing:-.02em;line-height:1.1}
+.sbox{background:#fff;border:1.5px solid var(--ink);border-radius:14px;padding:12px 14px;display:flex;justify-content:space-between}
+.caret{display:inline-block;width:2px;height:1em;background:var(--ink);vertical-align:-2px;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.res{display:flex;gap:10px;align-items:center;background:#fff;border-radius:14px;padding:10px;margin-top:8px;border:1px solid var(--line)}
+.res img{width:46px;height:46px;border-radius:10px;background:var(--tint);object-fit:cover}
+.res small{color:var(--muted);display:block}
+.bigp{background:var(--amber);border-radius:18px;padding:14px;margin-bottom:10px}
+.bigp .num{font-size:1.6rem;font-weight:500}
+.cite{font-size:.7rem;background:var(--ink);color:#fff;border-radius:6px;padding:1px 5px;margin-left:3px}
+.table div{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:6px;padding:7px 0;border-bottom:1px solid var(--line);align-items:center}
+.mint{background:var(--teal-tint);color:var(--teal-ink);border-radius:99px;padding:3px 8px;font-size:.68rem;font-weight:600;display:inline-block}
+.cov{height:8px;border-radius:8px;background:var(--line);margin:4px 0 10px}.cov i{display:block;height:100%;border-radius:8px;background:var(--teal)}
+
+/* any purchase strip */
+.any{padding:clamp(70px,10vw,130px) 0;overflow:hidden;background:var(--paper)}
+.any .wrap{margin-bottom:34px}
+.belt{display:flex;gap:18px;width:max-content;animation:belt 38s linear infinite;padding-inline:9px}
+.any:hover .belt{animation-play-state:paused}
+@keyframes belt{to{transform:translateX(-50%)}}
+.pc{width:min(60vw,260px);flex:none;background:var(--surface);border:1px solid var(--line);border-radius:28px;padding:14px;transition:transform .4s var(--ease),box-shadow .4s}
+.pc:hover{transform:translateY(-8px) rotate(-1.5deg);box-shadow:var(--shadow)}
+.pc img{border-radius:18px;background:var(--tint);aspect-ratio:1;object-fit:cover;width:100%}
+.pc b{display:block;margin-top:12px}.pc small{color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.belt{animation:none;overflow-x:auto;width:auto}}
+
+/* live app + hero v2 */
+.live{position:relative;overflow:hidden;background:var(--paper)}
+.live iframe{position:absolute;left:0;top:0;border:0;transform-origin:0 0;pointer-events:none;background:var(--paper)}
+.phone.try .live iframe{pointer-events:auto}
+.tryit{margin-top:14px;min-height:44px;padding:0 20px;border-radius:99px;border:1.5px solid var(--ink);background:transparent;font:600 .95rem var(--sans);cursor:pointer;transition:background .25s,color .25s}
+.tryit:hover,.tryit[aria-pressed=true]{background:var(--ink);color:#fff}
+.phone-wrap{flex-direction:column;align-content:center}
+.bframe{flex:1;min-height:0;margin-left:auto;width:min(100%,900px);background:#fff;border-radius:18px;box-shadow:0 24px 50px -22px #0007;overflow:hidden;display:flex;flex-direction:column}
+.bframe .btb{display:flex;align-items:center;gap:7px;padding:10px 14px;background:var(--tint);font-size:.78rem;color:var(--muted)}
+.bframe .btb i{width:10px;height:10px;border-radius:50%;background:#c3c9e4}
+.bframe .btb u{text-decoration:none;margin-left:8px;background:#fff;border-radius:99px;padding:3px 14px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bframe .live{flex:1;min-height:0}
+.mess{container-type:inline-size;width:56%}
+.mess .win{opacity:1;font-size:1.55cqw}
+.nav{transition:background .3s,backdrop-filter .3s}
+.nav.dark{background:transparent;backdrop-filter:none}
+.nav.dark .logo{color:#fff}
+
+.hx{position:relative;min-height:100svh;background:var(--ink);color:#fff;overflow:hidden;display:grid;align-content:center;padding:130px var(--gutter) clamp(150px,22vh,230px);isolation:isolate;--mx:70%;--my:30%;--sy:0}
+.hx::before{content:"";position:absolute;inset:0;z-index:-2;background:radial-gradient(560px circle at var(--mx) var(--my),#F59E0B38,transparent 62%),radial-gradient(1000px circle at 0% 100%,#1B2D6EAA,transparent 60%),radial-gradient(700px circle at 100% 0%,#1B2D6E88,transparent 60%)}
+.hx::after{content:"";position:absolute;inset:0;z-index:-1;opacity:.09;mix-blend-mode:overlay;pointer-events:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.hcopy{position:relative;z-index:3;transform:translateY(calc(var(--sy) * .18px))}
+.hx h1{font-size:clamp(2.6rem,8.4vw,8.6rem);line-height:.9;letter-spacing:-.05em;font-weight:800}
+.ln{display:block;white-space:nowrap;overflow:hidden;padding-bottom:.1em;margin-bottom:-.1em}
+.ln>span{display:block;transform:translateY(108%);animation:up 1.2s var(--ease) forwards;animation-delay:calc(.15s + var(--i) * .13s)}
+@keyframes up{to{transform:none}}
+.roll{display:inline-block;vertical-align:bottom;overflow:hidden;height:1.06em;color:var(--amber);transition:width .7s var(--ease);margin-bottom:-.06em}
+.roll ul{margin:0;padding:0;list-style:none;transition:transform .9s var(--ease)}
+.roll li{height:1.06em;line-height:1.06;white-space:nowrap}
+.roll li span{display:inline-block}
+.hclock{display:inline-flex;align-items:center;gap:16px;margin-top:clamp(22px,3.4vw,44px);padding:12px 22px 12px 18px;border-radius:99px;background:#ffffff14;border:1px solid #ffffff26;backdrop-filter:blur(8px);font-size:clamp(.95rem,1.4vw,1.15rem);color:var(--on-dark);opacity:0;animation:fade .8s var(--ease) 1s forwards}
+@keyframes fade{to{opacity:1}}
+.hclock .dot{width:10px;height:10px;border-radius:50%;background:#ff4d4d;box-shadow:0 0 0 0 #ff4d4d88;animation:pulse 1.6s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 12px #ff4d4d00}100%{box-shadow:0 0 0 0 #ff4d4d00}}
+.hclock .num{color:#fff;font-size:1.35em}
+.cards{position:absolute;inset:0;z-index:1;pointer-events:none}
+.hcw{position:absolute;left:var(--x);top:var(--y);width:clamp(150px,15.5vw,236px);transform:translate3d(calc(var(--px,0) * 1px),calc(var(--py,0) * 1px - var(--sy) * var(--d) * .35px),0)}
+.hc{background:#fff;color:var(--ink);border-radius:18px;overflow:hidden;box-shadow:0 30px 60px -20px #000c,0 0 0 1px #ffffff22;font-size:clamp(.62rem,.9vw,.8rem);line-height:1.3;transform:rotate(var(--r)) scale(.6);opacity:0;animation:pop 1s var(--ease) forwards,bob 7s ease-in-out infinite;animation-delay:calc(.5s + var(--n) * .12s),calc(1.6s + var(--n) * .3s)}
+@keyframes pop{to{opacity:1;transform:rotate(var(--r)) scale(1)}}
+@keyframes bob{50%{translate:0 -12px}}
+.hc .hb{display:flex;gap:5px;align-items:center;padding:8px 10px;background:var(--tint)}
+.hc .hb i{width:7px;height:7px;border-radius:50%;background:#c3c9e4}
+.hc .hb u{margin-left:6px;flex:1;background:#fff;border-radius:99px;height:12px}
+.hc .bd2{padding:10px 12px}
+.hc img{width:100%;aspect-ratio:1/.78;object-fit:cover;display:block;background:var(--tint)}
+.hc .pr{display:flex;justify-content:space-between;align-items:baseline;margin-top:6px}
+.hc .ln2{height:7px;border-radius:4px;background:#d9ddef;margin-top:6px}
+.hc .badge{display:inline-block;margin-top:6px;padding:2px 8px;border-radius:99px;background:var(--red-tint);color:var(--red);font-weight:700}
+.hc .st{color:var(--amber);letter-spacing:1px}
+.hq{position:absolute;left:0;right:0;bottom:clamp(18px,4vh,40px);z-index:2;overflow:hidden;white-space:nowrap}
+.hq div{display:inline-flex;gap:clamp(24px,4vw,56px);animation:belt 46s linear infinite;padding-right:clamp(24px,4vw,56px)}
+.hq:hover div{animation-play-state:paused}
+.hq span{font-size:clamp(2rem,5.6vw,5rem);font-weight:800;letter-spacing:-.04em;color:transparent;-webkit-text-stroke:1.5px #ffffff4d;transition:color .3s,-webkit-text-stroke-color .3s;pointer-events:auto}
+.hq span:hover{color:var(--amber);-webkit-text-stroke-color:var(--amber)}
+.hq b{color:var(--amber);font-size:clamp(1.4rem,3vw,2.6rem);align-self:center}
+@media (max-width:860px){
+  .hx{padding-top:110px}
+  .hx h1{font-size:clamp(2.5rem,12.6vw,5.4rem)}.pre{display:block}
+  .hcw{left:var(--mx2);top:var(--my2);width:34vw}
+  .hcw.nm{display:none}
+}
+@media (prefers-reduced-motion:reduce){.ln>span{transform:none}.hc{opacity:1;transform:rotate(var(--r))}.hclock{opacity:1}.hq div{animation:none}}
+
+/* horizontal journey */
+.hz{height:420vh;background:var(--paper);position:relative}
+.hz .pin3{position:sticky;top:0;height:100svh;overflow:hidden;display:flex;flex-direction:column;justify-content:center;gap:clamp(18px,4vw,40px)}
+.hz .hd{padding-inline:var(--gutter)}
+.track{display:flex;gap:clamp(14px,2.4vw,28px);padding-inline:var(--gutter);will-change:transform;width:max-content}
+.card{width:min(78vw,520px);min-height:min(48svh,380px);border-radius:32px;padding:clamp(20px,3vw,36px);display:flex;flex-direction:column;justify-content:space-between;flex:none}
+.card h3{font-size:clamp(1.8rem,3.6vw,3rem)}
+.card p{font-size:clamp(1rem,1.4vw,1.15rem)}
+.card .tag{font:500 .9rem var(--mono)}
+.hzbar{margin:0 var(--gutter);height:4px;background:var(--line);border-radius:4px;max-width:420px}.hzbar i{display:block;height:100%;width:0;background:var(--ink);border-radius:4px}
+@media (prefers-reduced-motion:reduce){.hz{height:auto}.hz .pin3{position:static;height:auto;padding:60px 0}.track{overflow-x:auto;width:auto}}
+
+/* 6 features */
+.feat{padding:clamp(70px,10vw,140px) 0;position:relative}
+.feat .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:clamp(24px,6vw,100px);align-items:center}
+.feat.flip .wrap>:first-child{order:2}
+.prob{font-size:clamp(1.1rem,1.8vw,1.5rem);color:var(--muted);font-style:italic;margin-bottom:18px}
+.benefit{margin-top:24px;padding:14px 18px;border-radius:16px;background:var(--amber-tint);display:inline-block;font-weight:500}
+.f-hub{background:var(--surface)}
+.f-price{background:var(--navy);color:#fff}
+.f-price .prob,.f-price .lead{color:var(--on-dark)}
+.f-cmp{background:var(--paper)}
+.f-dec{background:var(--amber-tint)}
+.f-own{background:var(--surface)}
+.ui{background:#fff;color:var(--ink);border-radius:28px;box-shadow:var(--shadow);padding:clamp(16px,2.4vw,30px);position:relative}
+.ui .tabsr{display:flex;gap:8px;flex-wrap:wrap}
+.ui .tabsr button{font:500 .95rem var(--sans);padding:10px 16px;min-height:44px;border-radius:99px;border:1px solid var(--line);background:#fff;cursor:pointer;transition:background .25s}
+.ui .tabsr button[aria-selected=true]{background:var(--amber);border-color:var(--amber);font-weight:600}
+.tabpanel{margin-top:18px;min-height:150px}
+.tabpanel .read{display:inline-block;margin-top:12px;font-size:.85rem;color:var(--teal-ink);font-weight:600}
+.floaty{position:absolute;background:#fff;border-radius:16px;padding:10px 14px;box-shadow:0 18px 30px -14px #0007;font-size:.9rem;font-weight:500;animation:bob 6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-10px)}}
+.chart{display:block;width:100%;height:auto}
+.rr{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.rr small{color:var(--muted)}
+.aff{font-size:.7rem;border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--muted);margin-left:6px}
+.ctab div{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:8px;padding:11px 0;border-bottom:1px solid var(--line);align-items:center}
+.ctab .h{font-weight:700;border-bottom:2px solid var(--ink)}
+.pri{background:var(--amber);border-radius:99px;padding:3px 9px;font-size:.72rem;font-weight:700;display:inline-block;margin-left:6px}
+.dec .cov{height:10px}
+.dec .row2{display:flex;justify-content:space-between;font-weight:500}
+.rev{padding:14px;border:1px solid var(--line);border-radius:16px;margin-bottom:10px}
+.rev small{color:var(--muted)}
+.ver{color:var(--teal-ink);font-weight:600;font-size:.8rem}
+.qa{display:flex;gap:8px;margin-top:6px}
+.qa input{flex:1;min-height:44px;border:1.5px solid var(--ink);border-radius:12px;padding:0 12px;font:inherit}
+.fine{margin-top:16px;font-size:.88rem;color:var(--muted)}
+
+/* 7 why */
+.why{background:var(--ink);color:#fff;padding:clamp(90px,14vw,190px) 0}
+.why ol{margin:48px 0 0;padding:0;list-style:none}
+.why li{font-size:clamp(1.6rem,4.6vw,4rem);font-weight:700;letter-spacing:-.035em;line-height:1.08;padding:18px 0;border-top:1px solid #ffffff26;display:flex;gap:20px;align-items:baseline;opacity:.35;transition:opacity .5s}
+.why li.act{opacity:1}
+.why li span{font:400 .95rem var(--mono);color:var(--amber);flex:none;width:2.5em}
+.why li small{display:block;font-size:clamp(1rem,1.5vw,1.2rem);font-weight:400;color:var(--on-dark);letter-spacing:0;margin-top:8px;max-width:32em}
+
+/* 8 final */
+.final{background:var(--amber);padding:clamp(100px,16vw,220px) 0;text-align:center;position:relative;overflow:hidden}
+.final h2{max-width:11ch;margin-inline:auto}
+.final p.lead{margin:26px auto 40px;color:var(--ink)}
+.final .btn{background:var(--ink)}
+.final .ph{position:absolute;width:min(22vw,220px);opacity:.95;filter:drop-shadow(0 20px 20px #0004)}
+.final .ph.c{left:10%;bottom:6%;transform:rotate(6deg);width:min(16vw,170px)}.final .ph.d{right:12%;top:8%;transform:rotate(-7deg);width:min(14vw,150px)}
+.final .ph.a{left:4%;top:12%;transform:rotate(-10deg)}.final .ph.b{right:4%;bottom:10%;transform:rotate(8deg)}
+footer{padding:28px var(--gutter);background:var(--ink);color:var(--on-dark);font-size:.9rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+
+@media (max-width:860px){
+  .pin{grid-template-columns:1fr;grid-template-rows:auto 1fr;align-content:center;padding-top:70px;gap:6px}
+  .cap h2{min-height:2.6em;font-size:clamp(1.5rem,6.4vw,2.2rem);margin:6px 0 10px}
+  .stage{height:46svh}
+  .win{width:66cqw}.w2,.w4,.w6,.w8{left:32cqw}
+  .how-grid,.feat .wrap,.pts{grid-template-columns:1fr}
+  .feat.flip .wrap>:first-child{order:0}
+  .phone-wrap{position:sticky;top:0;height:56svh;z-index:3;background:var(--tint);order:-1}
+  .phone{width:min(46vw,230px)}
+  .step{min-height:60svh}
+  .ghost{width:42vw;top:auto;bottom:24px;right:-6vw;opacity:.9}.hero h1,.hero .lead{position:relative;z-index:1}.hero{align-content:start;padding-top:110px}.cue{display:none}.hero h1{max-width:9ch}
+  .ghost-note{display:none}
+  .final .ph{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  .reveal{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav">
+  <a class="logo" href="#top" aria-label="TyoKina home">Tyo<b>kina?</b></a>
+  <a class="btn amber" href="#try">Try TyoKina <span aria-hidden="true">→</span></a>
+</header>
+
+<main id="main">
+<!-- 0 OPENING -->
+<section class="hx" id="top">
+  <div class="cards" aria-hidden="true"><div class="hcw" style="--x:63%;--y:9%;--mx2:52%;--my2:5%;--d:0.6" data-d="0.6"><div class="hc" style="--r:3deg;--n:0"><div class="hb"><i></i><i></i><i></i><u></u></div><div class="bd2"><b>best headphones under 40,000</b><div class="ln2"></div><div class="ln2" style="width:70%"></div><div class="ln2" style="width:85%"></div></div></div></div><div class="hcw" style="--x:79%;--y:18%;--mx2:58%;--my2:60%;--d:1" data-d="1"><div class="hc" style="--r:-4deg;--n:1"><div class="hb"><i></i><i></i><i></i><u></u></div><img src="img/xm5.webp" alt=""><div class="bd2"><b>Sony WH-1000XM5</b><div class="pr"><span class="st">★★★★★</span><span class="num">37,000</span></div></div></div></div><div class="hcw nm" style="--x:67%;--y:43%;--mx2:0%;--my2:0%;--d:0.7" data-d="0.7"><div class="hc" style="--r:5deg;--n:2"><div class="hb"><i></i><i></i><i></i><u></u></div><div class="bd2"><span class="st">★☆☆☆☆</span><br><b>“Died in 3 months”</b><div class="ln2"></div><div class="ln2" style="width:60%"></div></div></div></div><div class="hcw" style="--x:83%;--y:47%;--mx2:3%;--my2:68%;--d:1.1" data-d="1.1"><div class="hc" style="--r:-6deg;--n:3"><div class="hb"><i></i><i></i><i></i><u></u></div><img src="img/lgc4.webp" alt=""><div class="bd2"><b>LG C4 OLED 65"</b><div class="pr"><span>OLED vs QLED?</span><span class="num">2,11,000</span></div></div></div></div><div class="hcw" style="--x:64%;--y:64%;--mx2:30%;--my2:80%;--d:0.8" data-d="0.8"><div class="hc" style="--r:3deg;--n:4"><div class="bd2" style="background:#f4f4f1"><b>ChatGPT</b><div style="background:#fff;border-radius:10px;padding:8px;margin-top:6px">It depends on your needs. Here are 5 options…</div></div></div></div><div class="hcw nm" style="--x:43%;--y:76%;--mx2:0%;--my2:0%;--d:0.5" data-d="0.5"><div class="hc" style="--r:-3deg;--n:5"><div class="hb"><i></i><i></i><i></i><u></u></div><div class="bd2"><b>compare-FINAL-v3.xlsx</b><div class="pr"><span>XM5</span><span class="num">37,000</span></div><div class="pr"><span>QC45</span><span class="num">32,500</span></div></div></div></div><div class="hcw nm" style="--x:87%;--y:71%;--mx2:0%;--my2:0%;--d:1.2" data-d="1.2"><div class="hc" style="--r:5deg;--n:6"><div class="hb"><i></i><i></i><i></i><u></u></div><img src="img/s24.webp" alt=""><div class="bd2"><b>Galaxy S24</b><br><span class="badge">price dropped?</span></div></div></div><div class="hcw nm" style="--x:30%;--y:5%;--mx2:0%;--my2:0%;--d:0.4" data-d="0.4"><div class="hc" style="--r:-3deg;--n:7"><div class="hb"><i></i><i></i><i></i><u></u></div><div class="bd2"><b>▶ XM5 vs QC45 | 22:41</b><div class="ln2"></div></div></div></div></div>
+  <div class="hcopy">
+    <h1><span class="ln" style="--i:0"><span>Ever spent</span></span><span class="ln" style="--i:1"><span class="q">three hours</span></span><span class="ln" style="--i:2"><span><span class="pre">buying </span><span class="roll" id="roll"><ul><li><span>a laptop</span></li><li><span>a TV</span></li><li><span>a phone</span></li><li><span>headphones</span></li><li><span>a vacuum</span></li></ul></span><span class="q">?</span></span></span></h1>
+    <div class="hclock" role="img" aria-label="Three hours, fourteen minutes of research and twenty-three tabs open"><i class="dot"></i><span class="num" id="hclock">00:00:00</span><span>of research, <b class="num" id="htabs">0</b> tabs open</span></div>
+  </div>
+</section>
+
+<!-- 1 CHAOS (pinned, scroll driven) -->
+<section class="chaos" id="chaos" aria-label="The research spiral, step by step">
+  <div class="pin">
+    <div class="cap">
+      <small id="stepno">Step 1 of 8</small>
+      <h2 id="stepcap">You google “best noise cancelling headphones under 40,000”.</h2>
+      <div class="clock" aria-hidden="true"><div><span class="num" id="time">0:05</span><br>spent</div><div><span class="num tabs-n" id="tabsn">1</span><br>tabs open</div></div>
+      <div class="bar" aria-hidden="true"><i id="prog"></i></div>
+    </div>
+    <div class="stage" aria-hidden="true">
+      <div class="win w1"><div class="tb"><i></i><i></i><i></i><u>google.com/search?q=best+noise+cancelling+headphones+under+40000</u></div><div class="bd"><b>Top 10 headphones 2025 (sponsored)</b><div class="row"><span>Sony WH-1000XM5</span><span class="num">37,000</span></div><div class="row"><span>Bose QuietComfort 45</span><span class="num">32,500</span></div><div class="row"><span>AirPods Max</span><span class="num">59,500</span></div></div></div>
+      <div class="win w2"><div class="tb"><i></i><i></i><i></i><u>store.example/headphones</u></div><div class="bd"><b>Another shop. Another list.</b><div class="row"><span>Filter</span><span>Type ▾ ANC ▾ Codec ▾ Brand ▾</span></div><div class="row"><span>186 results</span><span>Sort: Popular</span></div></div></div>
+      <div class="win w3"><div class="tb"><i></i><i></i><i></i><u>specs-sheet.example/xm5-vs-qc45</u></div><div class="bd"><b>Specifications</b><div class="row"><span>Battery</span><span class="num">30 h / 24 h / 20 h</span></div><div class="row"><span>LDAC, multipoint, ANC…</span><span>?</span></div><div class="row"><span>What does that mean?</span><span>🤷</span></div></div></div>
+      <div class="win w4"><div class="tb"><i></i><i></i><i></i><u>reviews.example/sony-wh-1000xm5</u></div><div class="bd"><b><span class="stars">★★★★★</span> “Best purchase I’ve made”</b><b style="margin-top:.8cqw"><span class="stars">★☆☆☆☆</span> “Died in 3 months”</b><div class="row"><span>Which one is real?</span><span></span></div></div></div>
+      <div class="win w5"><div class="tb"><i></i><i></i><i></i><u>youtube.com/watch?v=…</u></div><div class="bd"><b>XM5 vs QC45 vs AirPods Max | 22:41</b><div class="row"><span>Sponsored by the brand in the video</span><span>▶</span></div><div class="row"><span>Part 2 of 3…</span><span></span></div></div></div>
+      <div class="win w6 gpt"><div class="tb"><i></i><i></i><i></i><u>chatgpt.com</u></div><div class="bd"><p>Which headphones are worth buying in Nepal?</p><p>It depends on your needs. Here are 5 options…</p><p>…and which one for <i>me</i>?</p></div></div>
+      <div class="win w7"><div class="tb"><i></i><i></i><i></i><u>compare-FINAL-v3.xlsx</u></div><div class="bd"><div class="row"><span>Model</span><span>Price</span><span>Battery?</span></div><div class="row"><span>XM5</span><span class="num">37,000</span><span>30h?</span></div><div class="row"><span>QC45</span><span class="num">32,500</span><span>24h?</span></div></div></div>
+      <div class="win w8"><div class="tb"><i></i><i></i><i></i><u>store.example/sony-xm5 · seen this one already</u></div><div class="bd"><b>Sony WH-1000XM5 · रू 38,000</b><div class="row"><span>Same headphones. A different price.</span><span>…</span></div><div class="row"><span>Sure about this one?</span><span>↺</span></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 PROBLEM -->
+<section class="problem">
+  <div class="wrap">
+    <h2 class="lg reveal">Buying something you want shouldn’t feel like <span class="q">work.</span></h2>
+    <p class="lead reveal d1" style="margin-top:28px">The trouble isn’t a lack of information. It’s that there’s too much of it, scattered everywhere, and none of it talks to the rest.</p>
+    <ul class="fr">
+      <li class="reveal"><span class="pill" style="--r:-2deg">Endless searching across platforms</span></li>
+      <li class="reveal d1"><span class="pill" style="--r:1.5deg">Too many products, too many choices</span></li>
+      <li class="reveal d2"><span class="pill" style="--r:-1deg">Reviews that contradict each other</span></li>
+      <li class="reveal"><span class="pill" style="--r:2deg">Specs that need a translator</span></li>
+      <li class="reveal d1"><span class="pill" style="--r:-2.5deg">Which one is actually good value?</span></li>
+      <li class="reveal d2"><span class="pill" style="--r:1deg">Second-guessing after you buy</span></li>
+      <li class="reveal d3"><span class="pill" style="--r:-1.5deg">Hours of reading before spending a rupee</span></li>
+    </ul>
+    <h2 class="md quote reveal">You’ve done the research. You’ve read the reviews. You’ve compared the specs. <em>So why are you still unsure?</em></h2>
+  </div>
+</section>
+
+<!-- 3 TURNING POINT (scroll driven) -->
+<section class="turn" id="turn" aria-label="Meet TyoKina">
+  <div class="pin2">
+    <div class="orb"></div>
+    <h2 class="lg what">What if finding the right product didn’t have to be this complicated?</h2>
+    <div class="meet">
+      <p class="lead" style="font-size:1.2rem">Meet</p>
+      <div class="wordmark">Tyo<b>kina?</b></div>
+      <p class="lead">A smarter, simpler way to research what you’re about to buy, explore your options, and decide with confidence.</p>
+      <p class="lead" style="font-size:1rem">TyoKina is a research companion for big purchases in Nepal. It gathers what you’d otherwise hunt for across twenty tabs into one place, organised around the questions you actually have.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 3b ANY PURCHASE -->
+<section class="any" aria-label="Works for the big purchases">
+  <div class="wrap">
+    <h2 class="lg reveal">Laptop. TV. Phone. Headphones. <span class="q">Whatever it is.</span></h2>
+    <p class="lead reveal d1" style="margin-top:18px">If it’s a big purchase that makes you pause, it deserves better than twenty open tabs.</p>
+  </div>
+  <div class="belt" aria-hidden="true"><div class="pc"><img src="img/mba.webp" alt="" loading="lazy"><b>MacBook Air M3</b><small>Laptops</small></div><div class="pc"><img src="img/lgc4.webp" alt="" loading="lazy"><b>LG C4 OLED 65"</b><small>TVs</small></div><div class="pc"><img src="img/xm5.webp" alt="" loading="lazy"><b>Sony WH-1000XM5</b><small>Headphones</small></div><div class="pc"><img src="img/s24.webp" alt="" loading="lazy"><b>Samsung Galaxy S24</b><small>Phones</small></div><div class="pc"><img src="img/v15.webp" alt="" loading="lazy"><b>Dyson V15</b><small>Home</small></div><div class="pc"><img src="img/mx3s.webp" alt="" loading="lazy"><b>Logitech MX Master 3S</b><small>Accessories</small></div><div class="pc"><img src="img/mba.webp" alt="" loading="lazy"><b>MacBook Air M3</b><small>Laptops</small></div><div class="pc"><img src="img/lgc4.webp" alt="" loading="lazy"><b>LG C4 OLED 65"</b><small>TVs</small></div><div class="pc"><img src="img/xm5.webp" alt="" loading="lazy"><b>Sony WH-1000XM5</b><small>Headphones</small></div><div class="pc"><img src="img/s24.webp" alt="" loading="lazy"><b>Samsung Galaxy S24</b><small>Phones</small></div><div class="pc"><img src="img/v15.webp" alt="" loading="lazy"><b>Dyson V15</b><small>Home</small></div><div class="pc"><img src="img/mx3s.webp" alt="" loading="lazy"><b>Logitech MX Master 3S</b><small>Accessories</small></div></div>
+  <p class="fine wrap">Examples from the TyoKina demo catalog. Images are AI-generated illustrations.</p>
+</section>
+
+<!-- 4 BEFORE / WITH -->
+<section class="ba">
+  <div class="wrap">
+    <h2 class="lg reveal">Same purchase. <span class="q">Two ways</span> to get there.</h2>
+    <p class="lead reveal d1" style="margin-top:20px">Drag the line, or use the arrow keys.</p>
+    <div class="compare reveal" id="cmp">
+      <div class="side with">
+        <h3>With TyoKina</h3>
+        <div class="bframe"><div class="btb"><i></i><i></i><i></i><u>tyokina · Sony WH-1000XM5</u></div><div class="live" data-live="hub" data-w="1440"></div></div>
+      </div>
+      <div class="side without">
+        <h3>Without</h3>
+        <div class="mess" id="mess" aria-hidden="true"></div>
+      </div>
+      <div class="handle" aria-hidden="true"></div>
+      <input type="range" min="8" max="92" value="50" id="cmpr" aria-label="Compare researching without TyoKina and with TyoKina">
+    </div>
+    <div class="pts">
+      <div class="reveal"><h4>Without TyoKina</h4><ul><li>Multiple browser tabs</li><li>Endless Google searches</li><li>Hours reading reviews</li><li>Comparison spreadsheets</li><li>Repeated ChatGPT chats</li><li>Confusion and uncertainty</li></ul></div>
+      <div class="yes reveal d1"><h4>With TyoKina</h4><ul class="yes"><li>A more streamlined research flow</li><li>Product information brought together</li><li>Easier exploring and comparing</li><li>Less time hopping between sources</li><li>More clarity when weighing options</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 HOW -->
+<section class="how" id="how">
+  <div class="wrap">
+    <h2 class="lg reveal">Here’s what it actually <span class="q">looks like.</span></h2>
+    <div class="how-grid">
+      <div class="steps" id="steps">
+        <div class="step act" data-i="0"><span class="n">1</span><h3 class="md">Search for the thing you’re about to buy</h3><p class="lead">Type a product. Typos are fine, we’ll work out what you meant.</p></div>
+        <div class="step" data-i="1"><span class="n">2</span><h3 class="md">Get answers, not a pile of links</h3><p class="lead">Research is organised into the questions people really ask, with sources you can check.</p></div>
+        <div class="step" data-i="2"><span class="n">3</span><h3 class="md">Put your options side by side</h3><p class="lead">Compare products on what you care about, with plain-language help for the jargon.</p></div>
+        <div class="step" data-i="3"><span class="n">4</span><h3 class="md">Check your decision before you pay</h3><p class="lead">See what you’ve covered, what’s still unknown, and decide when you’re ready.</p></div>
+      </div>
+      <div class="phone-wrap">
+        <div class="phone" id="phone" aria-label="The real TyoKina app, changing as you scroll through the steps">
+          <div class="scr live" id="phonelive" data-live="home" data-w="390"></div>
+        </div>
+        <button class="tryit" id="tryit" aria-pressed="false">Try it yourself</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5b HORIZONTAL: five questions -->
+<section class="hz" id="hz" aria-label="The five questions TyoKina organises research around">
+  <div class="pin3">
+    <div class="hd">
+      <h2 class="lg">One purchase. <span class="q">Five questions.</span></h2>
+      <p class="lead" style="margin-top:14px">TyoKina sorts the chaos into the questions every buyer ends up asking. Keep scrolling.</p>
+    </div>
+    <div class="track" id="track">
+      <div class="card" style="background:var(--amber)"><span class="tag">Question 1</span><div><h3>Is it good?</h3><p style="margin-top:10px">A short summary with citations, instead of ten tabs of opinions.</p></div></div>
+      <div class="card" style="background:var(--navy);color:#fff"><span class="tag">Question 2</span><div><h3>Who says so?</h3><p style="margin-top:10px;color:var(--on-dark)">The evidence sources behind it, so you can check, not just trust.</p></div></div>
+      <div class="card" style="background:var(--teal-tint)"><span class="tag">Question 3</span><div><h3>Will it last?</h3><p style="margin-top:10px">What ownership is actually like once the shine wears off.</p></div></div>
+      <div class="card" style="background:var(--ink);color:#fff"><span class="tag">Question 4</span><div><h3>Is now the time?</h3><p style="margin-top:10px;color:var(--on-dark)">Where today’s price sits, which retailers have it, and an alert if it drops.</p></div></div>
+      <div class="card" style="background:var(--tint)"><span class="tag">Question 5</span><div><h3>What do owners say?</h3><p style="margin-top:10px">Verified owners in their own words, and a place to ask them yourself.</p></div></div>
+    </div>
+    <div class="hzbar" aria-hidden="true"><i id="hzp"></i></div>
+  </div>
+</section>
+
+<!-- 6 FEATURES -->
+<section class="feat f-hub">
+  <div class="wrap">
+    <div>
+      <p class="prob reveal">“I don’t even know what I should be asking.”</p>
+      <h2 class="lg reveal d1">Start with the <span class="q">questions.</span></h2>
+      <p class="lead reveal d2" style="margin-top:20px">Each product’s research hub is built around five questions, and it keeps track of which ones you’ve read.</p>
+      <p class="benefit reveal d3">Less wandering. You always know what’s left to check.</p>
+    </div>
+    <div class="ui reveal d1">
+      <div class="tabsr" role="tablist" aria-label="Research questions">
+        <button role="tab" aria-selected="true">Is it good?</button><button role="tab" aria-selected="false">Who says so?</button><button role="tab" aria-selected="false">Will it last?</button><button role="tab" aria-selected="false">Is now the time?</button><button role="tab" aria-selected="false">What do owners say?</button>
+      </div>
+      <div class="tabpanel" id="hubpanel" role="tabpanel" aria-live="polite"></div>
+      <div class="floaty" style="right:-10px;top:-18px">✓ 2 of 5 questions read</div>
+    </div>
+  </div>
+</section>
+
+<section class="feat flip f-price">
+  <div class="wrap">
+    <div>
+      <p class="prob reveal">“Is rs 37,000 a good price, or just a price?”</p>
+      <h2 class="lg reveal d1">See where today’s price sits.</h2>
+      <p class="lead reveal d2" style="margin-top:20px">Price history over weeks, months or a year. A low / typical / high meter. Retailers listed side by side, with affiliate links marked as such.</p>
+      <p class="benefit reveal d3" style="color:var(--ink)">Set an alert for any drop, or for a price you pick.</p>
+    </div>
+    <div class="ui reveal d1">
+      <svg class="chart" viewBox="0 0 400 150" role="img" aria-label="Illustrative price line chart trending down"><defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#F59E0B" stop-opacity=".3"/><stop offset="1" stop-color="#F59E0B" stop-opacity="0"/></linearGradient></defs><path d="M0 40 L60 46 L120 38 L180 60 L240 70 L300 62 L360 100 L400 108 V150 H0Z" fill="url(#g)"/><path id="line" d="M0 40 L60 46 L120 38 L180 60 L240 70 L300 62 L360 100 L400 108" fill="none" stroke="#0C0E1A" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" pathLength="1" style="stroke-dasharray:1;stroke-dashoffset:1"/></svg>
+      <div style="display:flex;gap:8px;margin:8px 0 10px"><span class="chip">Weekly</span><span class="chip on">Monthly</span><span class="chip">Yearly</span></div>
+      <div class="rr"><b>Daraz <span class="aff">affiliate</span></b><span class="num">37,000</span><small>In stock · 2-day delivery</small><span></span></div>
+      <div class="rr"><b>HamroBazar</b><span class="num">37,500</span><small>In stock · Pickup in Kathmandu</small><span></span></div>
+      <div class="floaty" style="left:-14px;bottom:30px">🔔 Alert at rs 35,000</div>
+    </div>
+  </div>
+</section>
+
+<section class="feat f-cmp">
+  <div class="wrap">
+    <div>
+      <p class="prob reveal">“What does ‘500 nits’ even mean for me?”</p>
+      <h2 class="lg reveal d1">Compare without being <span class="q">told what to buy.</span></h2>
+      <p class="lead reveal d2" style="margin-top:20px">Spec help in plain words. The strongest value in each row gets a quiet marker, never a crown, and your own priorities come first.</p>
+      <p class="benefit reveal d3">You stay in charge of the decision.</p>
+    </div>
+    <div class="ui reveal d1">
+      <div class="ctab">
+        <div class="h"><span></span><span>Sony XM5</span><span>Bose QC45</span></div>
+        <div><span>Battery <span class="pri">★</span><br><small style="color:var(--muted)">your priority</small></span><span><span class="mint">Strongest in row</span><br><span class="num">30 h</span></span><span class="num">24 h</span></div>
+        <div><span>Weight</span><span class="num">250 g</span><span><span class="mint">Strongest in row</span><br><span class="num">238 g</span></span></div>
+        <div><span>Price</span><span class="num">रू 37,000</span><span><span class="mint">Strongest in row</span><br><span class="num">रू 32,500</span></span></div>
+      </div>
+      <div class="floaty" style="right:-8px;bottom:-16px">No winner crowned</div><p class="fine">Demo data from the TyoKina app (headphones shown, same idea for laptops).</p>
+    </div>
+  </div>
+</section>
+
+<section class="feat flip f-dec">
+  <div class="wrap">
+    <div>
+      <p class="prob reveal">“I’ve read a lot. Have I read enough?”</p>
+      <h2 class="lg reveal d1">A <span class="q">last look</span> before you pay.</h2>
+      <p class="lead reveal d2" style="margin-top:20px;color:var(--ink)">The Decision check shows what you’ve covered, what’s still uncertain, and your top priorities (up to three per category).</p>
+      <p class="benefit reveal d3" style="background:#fff">Honest about what’s known, and what isn’t.</p>
+    </div>
+    <div class="ui dec reveal d1">
+      <h3 class="md" style="margin-bottom:16px">Decision check</h3>
+      <div class="row2"><span>Questions covered</span><span class="num">4 / 5</span></div><div class="cov"><i style="width:80%"></i></div>
+      <div class="row2"><span>Still uncertain</span><span class="num">1</span></div><div class="cov"><i style="width:25%;background:var(--amber)"></i></div>
+      <p style="margin-top:6px"><span class="pri" style="margin:0">1</span> Battery life &nbsp; <span class="pri">2</span> Weight &nbsp; <span class="pri">3</span> Price</p>
+    </div>
+  </div>
+</section>
+
+<section class="feat f-own">
+  <div class="wrap">
+    <div>
+      <p class="prob reveal">“Reviews are one thing. What’s it like after a year?”</p>
+      <h2 class="lg reveal d1">Hear from people who <span class="q">own it.</span></h2>
+      <p class="lead reveal d2" style="margin-top:20px">Owner reviews and follow-ups, with verified owners marked. Ask owners your own question and vote on what helped.</p>
+      <p class="benefit reveal d3">Real experience, not just launch-week hype.</p>
+    </div>
+    <div class="ui reveal d1">
+      <div class="rev"><b>Transformed my open-plan office</b><br><small>Rajan M. · Owned 6 months · <span class="ver">Verified owner</span></small><p style="margin-top:6px">Bought these to survive a noisy office. Calls are clear and ANC handles chatter.</p><small>👍 162 found this helpful · Updated at 6-month check-in</small></div>
+      <div class="rev"><b>Nearly perfect, just wish they folded</b><br><small>Ayesha R. · Owned 1 year · <span class="ver">Verified owner</span></small></div>
+      <div class="qa"><input aria-label="Ask owners a question" placeholder="Ask owners something…"><button class="btn" style="pointer-events:auto">Ask</button></div>
+      <div class="floaty" style="left:-10px;top:-16px">Sample from the demo app</div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 WHY -->
+<section class="why">
+  <div class="wrap">
+    <h2 class="lg reveal">Why <span class="q">TyoKina?</span></h2>
+    <ol id="whylist">
+      <li><span>01</span><div>Research gets simpler.<small>One place to start instead of twenty.</small></div></li>
+      <li><span>02</span><div>Information gets clearer.<small>Plain words, cited sources, nothing hidden.</small></div></li>
+      <li><span>03</span><div>Options are easier to weigh.<small>Side by side, on what matters to you.</small></div></li>
+      <li><span>04</span><div>Less tab-hopping.<small>Reviews, prices and specs under one roof.</small></div></li>
+      <li><span>05</span><div>More confident choices.<small>You decide, with the gaps in view.</small></div></li>
+    </ol>
+  </div>
+</section>
+
+<!-- 8 FINAL -->
+<section class="final" id="try">
+  <img class="ph a" src="img/mba.webp" alt="">
+  <img class="ph b" src="img/xm5.webp" alt=""><img class="ph c" src="img/lgc4.webp" alt=""><img class="ph d" src="img/s24.webp" alt="">
+  <div class="wrap">
+    <p class="lead reveal" style="margin-bottom:22px">Remember the last big purchase? The tabs, the spreadsheet, the three hours?</p>
+    <h2 class="xl reveal d1">Less searching. Less guessing. Better decisions.</h2>
+    <p class="lead reveal d2">Buying something important shouldn’t take your whole evening.</p>
+    <a class="btn big reveal d3" href="../index.html">Start your smarter buying journey <span aria-hidden="true">→</span></a>
+  </div>
+</section>
+</main>
+<footer><span>Tyo<b style="color:var(--amber)">kina?</b></span><span>Product images are AI-generated illustrations. Prices and data shown are demo examples.</span></footer>
+
+<script>
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const rm=matchMedia('(prefers-reduced-motion: reduce)').matches;
+// reveals
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.15});
+$$('.reveal').forEach(el=>io.observe(el));
+
+// chaos: scroll progress drives windows, caption, clock
+const caps=["You google “best noise cancelling headphones under 40,000”.","You open five shops. Every list looks different.","You hunt for specs, then for what they mean.","You read the reviews. Half love it, half don’t.","You watch a 22-minute comparison video.","You ask ChatGPT. It says “it depends.”","You build a spreadsheet. Then another version.","You find the same pair at a different price. Start again."];
+const times=["0:05","0:25","0:50","1:20","1:55","2:20","2:45","3:10"];
+const wins=$$('.win'),chaos=$('#chaos');
+function chaosTick(){
+  const r=chaos.getBoundingClientRect(),max=chaos.offsetHeight-innerHeight;
+  const p=Math.min(1,Math.max(0,-r.top/max));
+  const n=Math.min(8,Math.floor(p*8.4)+1);
+  wins.forEach((w,i)=>w.classList.toggle('on',i<n||rm));
+  $('#stepcap').textContent=caps[n-1];$('#stepno').textContent=`Step ${n} of 8`;
+  $('#time').textContent=times[n-1];$('#tabsn').textContent=n*3-1;
+  $('#prog').style.width=(p*100)+'%';
+}
+// turn: crossfade question into brand
+const turn=$('#turn');
+function turnTick(){
+  const r=turn.getBoundingClientRect(),max=turn.offsetHeight-innerHeight;
+  const p=Math.min(1,Math.max(0,-r.top/max));
+  const a=1-Math.min(1,Math.max(0,(p-.25)/.25)),b=Math.min(1,Math.max(0,(p-.45)/.3));
+  turn.style.setProperty('--a',a);turn.style.setProperty('--b',b);
+}
+const hzs=$('#hz'),track=$('#track');
+function hzTick(){
+  if(rm)return;
+  const r=hzs.getBoundingClientRect(),max=hzs.offsetHeight-innerHeight;
+  const p=Math.min(1,Math.max(0,-r.top/max));
+  track.style.transform=`translateX(${-p*(track.scrollWidth-innerWidth)}px)`;
+  $('#hzp').style.width=(p*100)+'%';
+}
+let tk=false;addEventListener('scroll',()=>{if(!tk){tk=true;requestAnimationFrame(()=>{chaosTick();turnTick();hzTick();tk=false})}},{passive:true});
+chaosTick();turnTick();hzTick();
+
+// before/with slider
+const cmp=$('#cmp'),r=$('#cmpr');r.addEventListener('input',()=>cmp.style.setProperty('--p',r.value));
+
+// how it works: step highlights phone page
+const pgs=$$('.pg'),stepsEl=$$('.step');
+const so=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){const i=+e.target.dataset.i;stepsEl.forEach(s=>s.classList.toggle('act',s===e.target));goLive(i)}}),{rootMargin:'-45% 0px -45% 0px'});
+stepsEl.forEach(s=>so.observe(s));
+
+// why list highlight
+const wo=new IntersectionObserver(es=>es.forEach(e=>e.target.classList.toggle('act',e.isIntersecting)),{rootMargin:'-40% 0px -40% 0px'});
+$$('#whylist li').forEach(l=>wo.observe(l));
+
+// hub tabs
+const hub=[
+ ["A short answer, with the evidence behind it.","An AI summary with citations, so you can see where each point comes from."],
+ ["The sources, laid out.","Evidence sources you can open and check for yourself."],
+ ["What it’s like to own, over time.","Ownership experience: how it holds up after the first week."],
+ ["Is today a good day to buy?","Price history, a low / typical / high meter, retailers and alerts."],
+ ["Owners, in their own words.","Reviews from owners, plus questions you can ask them directly."]];
+const panel=$('#hubpanel'),tabs=$$('[role=tab]');
+function show(i){tabs.forEach((t,j)=>t.setAttribute('aria-selected',i===j));panel.innerHTML=`<h3 class="md">${hub[i][0]}</h3><p class="lead" style="margin-top:10px">${hub[i][1]}</p><span class="read">✓ Marked as read</span>`}
+tabs.forEach((t,i)=>{t.onclick=()=>show(i);t.onkeydown=e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){const j=(i+(e.key==='ArrowRight'?1:tabs.length-1))%tabs.length;tabs[j].focus();show(j)}}});
+show(0);
+
+// price line draws when visible
+const line=$('#line');new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){line.style.transition='stroke-dashoffset 1.6s var(--ease)';line.style.strokeDashoffset=0;o.disconnect()}}),{threshold:.4}).observe(line);
+
+// ===== live app embeds =====
+function mountLive(host){
+  if(host.querySelector('iframe'))return;
+  const base=+host.dataset.w||390,f=document.createElement('iframe');
+  f.title='The TyoKina app, running live';f.src='app/index.html#/'+host.dataset.live;f.setAttribute('loading','eager');
+  host.append(f);host._f=f;
+  if(host.id==='phonelive')f.addEventListener('load',()=>setTimeout(()=>goLive(screens.indexOf(host.dataset.live)),350));
+  const fit=()=>{const w=host.clientWidth,h=host.clientHeight;if(!w)return;const k=w/base;f.style.width=base+'px';f.style.height=(h/k)+'px';f.style.transform='scale('+k+')'};
+  fit();host._fit=fit;new ResizeObserver(fit).observe(host);
+}
+const lio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){mountLive(e.target);lio.unobserve(e.target)}}),{rootMargin:'600px 0px'});
+$$('.live[data-live]').forEach(h=>lio.observe(h));
+const phoneLive=$('#phonelive'),screens=['home','hub','compare','decide'];
+function goLive(i){
+  const f=phoneLive._f;phoneLive.dataset.live=screens[i];
+  if(!f)return;
+  try{f.contentWindow.location.hash='#/'+screens[i];f.contentWindow.scrollTo(0,0)}catch(e){f.src='app/index.html#/'+screens[i]}
+}
+$('#tryit').addEventListener('click',e=>{
+  const on=e.currentTarget.getAttribute('aria-pressed')!=='true';
+  e.currentTarget.setAttribute('aria-pressed',on);e.currentTarget.textContent=on?'Back to scrolling':'Try it yourself';
+  $('#phone').classList.toggle('try',on);
+});
+// before: the same research, as real windows piled up
+(function(){
+  const mess=$('#mess'),src=$$('.stage .win'),spots=[[0,2],[30,0],[4,26],[32,24],[2,50],[30,48],[16,70]];
+  [0,1,3,4,2,5,6].forEach((si,n)=>{
+    const c=src[si].cloneNode(true);c.classList.remove('w1','w2','w3','w4','w5','w6','w7','w8');
+    c.style.left=spots[n][0]+'cqw';c.style.top=spots[n][1]+'%';c.style.width='54cqw';c.style.setProperty('--r',((n%2?1:-1)*(1.5+n*.5))+'deg');c.classList.add('on');
+    mess.append(c);
+  });
+})();
+
+// ===== hero v2 =====
+(function(){
+  const hx=$('#top'),navEl=$('.nav'),ul=$('#roll ul'),roll=$('#roll'),lis=[...ul.children];
+  navEl.classList.add('dark');
+  let wi=0;
+  const fitRoll=()=>{roll.style.width=lis[wi].firstChild.offsetWidth+'px'};
+  const setWord=n=>{wi=n;ul.style.transform='translateY('+(-wi*100/lis.length)+'%)';fitRoll()};
+  (document.fonts?document.fonts.ready:Promise.resolve()).then(()=>{roll.style.transition='none';fitRoll();requestAnimationFrame(()=>roll.style.transition='')});
+  if(!rm)setInterval(()=>setWord((wi+1)%lis.length),2600);
+  addEventListener('resize',fitRoll);
+  // research clock counts up fast, then keeps ticking
+  const ck=$('#hclock'),tb=$('#htabs'),target=3*3600+14*60+7;
+  const fmt=n=>[Math.floor(n/3600),Math.floor(n%3600/60),n%60].map(v=>String(v).padStart(2,'0')).join(':');
+  let secs=target;
+  if(rm){ck.textContent=fmt(target);tb.textContent=23}
+  else{
+    const t0=performance.now()+900;
+    (function tick(now){
+      const p=Math.min(1,Math.max(0,(now-t0)/2800)),e=1-Math.pow(1-p,3);
+      ck.textContent=fmt(Math.floor(target*e));tb.textContent=Math.round(23*e);
+      if(p<1)requestAnimationFrame(tick);else setInterval(()=>{secs++;ck.textContent=fmt(secs)},1000);
+    })(performance.now());
+  }
+  // cursor light + parallax cards, scroll drift
+  const cards=$$('.hcw'),tgt={x:0,y:0},cur={x:0,y:0};let vis=true;
+  new IntersectionObserver(es=>es.forEach(e=>{vis=e.isIntersecting})).observe(hx);
+  hx.addEventListener('pointermove',e=>{
+    const r=hx.getBoundingClientRect();tgt.x=(e.clientX-r.left)/r.width-.5;tgt.y=(e.clientY-r.top)/r.height-.5;
+    hx.style.setProperty('--mx',(tgt.x+.5)*100+'%');hx.style.setProperty('--my',(tgt.y+.5)*100+'%');
+  });
+  if(!rm)(function loop(){
+    if(vis){
+      cur.x+=(tgt.x-cur.x)*.06;cur.y+=(tgt.y-cur.y)*.06;
+      cards.forEach(c=>{const d=+c.dataset.d;c.style.setProperty('--px',(-cur.x*70*d).toFixed(1));c.style.setProperty('--py',(-cur.y*50*d).toFixed(1))});
+    }
+    requestAnimationFrame(loop);
+  })();
+  addEventListener('scroll',()=>{
+    const y=scrollY;
+    if(y<innerHeight*1.2)hx.style.setProperty('--sy',y);
+    navEl.classList.toggle('dark',y<hx.offsetHeight-90);
+  },{passive:true});
+})();
+</script>
+</body>
+</html>
