@@ -47,6 +47,10 @@ Accessibility: skip link, focus held in sheets and returned on close, arrow keys
 3. Dark mode.
 4. Swap the AI-generated images for real, credited photos (Wikimedia Commons, exact models, author + licence) once access exists (`commons.wikimedia.org`, `upload.wikimedia.org`). Keep the 800×800 square WebP convention.
 
+## The case study (presentation site)
+
+The `case-study/` folder is a separate Vite project: a 39-slide live presentation with a 15-minute script, using this app inside its phones. Read `case-study/HANDOFF.md`. After changing the app, run `npm run publish` in `case-study/` to refresh both hosted sites.
+
 ## Repo map
 
 - `src/screens/`: Home, Hub, Compare, Decide, Social (Community, Notifications, Review), Account (Saved, Profile, How, Explore, Guide)
