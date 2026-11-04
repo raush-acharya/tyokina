@@ -335,18 +335,6 @@ export const slides = [
     },
   },
   {
-    id: 'principles', ch: 3, theme: 'ink', t: 28, title: 'Six rules every screen has to follow',
-    notes: `The clusters became six principles, which I used to judge every screen. Transparency over persuasion. Evidence over popularity. Confidence over conversion. Honest uncertainty. Empower, don't decide: no forced winners. And consistency. You'll see them settle real arguments.`,
-    html: `
-    <div class="wrap stack">
-      <h2 class="h1" data-split>Six rules every screen has to follow<span class="accent">.</span></h2>
-      <div class="grid g3" style="margin-top:1rem">
-        ${[['Transparency over persuasion', 'Show the evidence; never push the sale.'], ['Evidence over popularity', 'A well-sourced claim outranks a popular one.'], ['Confidence over conversion', 'Success is a confident decision, even if it is “don’t buy yet”.'], ['Honest uncertainty', 'Say what we don’t know. Never overstate certainty.'], ['Empower, don’t decide', 'Explain trade-offs; let the buyer choose. No forced winners.'], ['Consistency builds trust', 'Same structure, same rules, every product.']]
-          .map(([h, p], i) => `<div class="card ${i === 2 ? 'card--amber' : i === 4 ? 'card--navy' : 'card--solid'}" data-in style="min-height:11rem;display:grid;align-content:space-between"><span class="big-n" style="font-size:2.4rem">0${i + 1}</span><div><h3 class="h2">${h}</h3><p class="sub" style="margin-top:.5rem">${p}</p></div></div>`).join('')}
-      </div>
-    </div>`,
-  },
-  {
     id: 'nuf', ch: 3, theme: 'paper', t: 30, title: 'Picking what to build first',
     notes: `Eight concepts, two weeks. So I ran a NUF test: score each idea on how New, Useful and Feasible it is, one to five, so fifteen is the top. Four concepts scored fourteen and became Version One. Ownership and decision support were Version Two. These are my own estimates, to revisit after interviews.`,
     html: `

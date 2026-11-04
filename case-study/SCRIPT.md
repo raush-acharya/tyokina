@@ -1,6 +1,6 @@
 # TyoKina case study: 15-minute presenter script
 
-Planned running time **14:17** across **39 slides**. Press **P** on the site for presenter mode (notes, timer, pace against these timestamps), **G** for the overview.
+Planned running time **14:01** across **38 slides**. Press **P** on the site for presenter mode (notes, timer, pace against these timestamps), **G** for the overview.
 
 `[step]` marks a key press that reveals the next beat on the same slide. Spoken pace is about 140 words a minute; the word count per slide is a check on that.
 
@@ -102,49 +102,45 @@ Then the affinity diagram: grouping the sticky notes to find patterns. Eight the
 
 **[step]** And the decision layer: the goal isn't to recommend products, it's to support confident decisions.
 
-### 20 · Six rules every screen has to follow  `06:24` · 16s · 37 words
-
-The clusters became six principles, which I used to judge every screen. Transparency over persuasion. Evidence over popularity. Confidence over conversion. Honest uncertainty. Empower, don't decide: no forced winners. And consistency. You'll see them settle real arguments.
-
-### 21 · Picking what to build first  `06:40` · 22s · 53 words
+### 20 · Picking what to build first  `06:24` · 22s · 53 words
 
 Eight concepts, two weeks. So I ran a NUF test: score each idea on how New, Useful and Feasible it is, one to five, so fifteen is the top. Four concepts scored fourteen and became Version One. Ownership and decision support were Version Two. These are my own estimates, to revisit after interviews.
 
-### 22 · Four ideas made the cut  `07:02` · 15s · 34 words
+### 21 · Four ideas made the cut  `06:46` · 15s · 34 words
 
 The four that scored fourteen became the heart of release one: evidence-backed research, a unified workspace, an AI decision assistant that explains trade-offs, and transparent AI. Each points back to the questions it answers.
 
 ## Prototype
 
-### 23 · Prototype  `07:17` · 3s · 3 words
+### 22 · Prototype  `07:01` · 3s · 3 words
 
 Stage four. Prototype.
 
-### 24 · Where everything lives  `07:20` · 21s · 44 words
+### 23 · Where everything lives  `07:04` · 21s · 44 words
 
 Structure first: the information architecture, an operational map of how the product works. Five tabs, and one shared destination, the Research Hub, reachable from everywhere so a buyer never loses their place. Click to zoom; this is the real diagram from my Figma file.
 
-### 25 · Before and after: one buyer’s journey  `07:41` · 22s · 47 words
+### 24 · Before and after: one buyer’s journey  `07:25` · 22s · 47 words
 
 Here's the as-is flow beside the to-be flow. Today: four-plus platforms, anonymous opinions, a re-research loop, manual price checks, regret. With TyoKina: the same steps, in one place, with verified owners, a confidence check, price history, and alerts instead of rechecking. The steps stay; the friction goes.
 
-### 26 · The paths through the app  `08:03` · 23s · 50 words
+### 25 · The paths through the app  `07:47` · 23s · 50 words
 
 Then user flows: the path someone takes to finish a goal. I drew six task flows plus flowcharts. Here are two. The first is the research and confidence loop: search, review the evidence, compare if needed, and if you're not confident yet, keep researching. Buying isn't the only good ending.
 
-### 27 · Pen and paper first  `08:26` · 23s · 49 words
+### 26 · Pen and paper first  `08:10` · 23s · 49 words
 
 Then wireframes, and I started on paper. This is my actual notebook: Home, Compare, Community and Profile, sketched by hand. Then the first digital version. Testing it against my principles changed three things: the rupee symbol, a fifth Saved tab, and a comparison that no longer picks a winner.
 
-### 28 · What it should feel like  `08:49` · 28s · 62 words
+### 27 · What it should feel like  `08:33` · 28s · 62 words
 
 Before hi-fi, a mood board. The question to answer: how should the user feel? For a high-stakes purchase, I wanted calm, clear and honest. I collected references for clean product cards, readable price charts, structured reviews and honest comparison tables. The takeaways: navy for calm authority, one accent for decisions and prices, numbers in a monospace face, and lots of white space.
 
-### 29 · The design system  `09:17` · 24s · 52 words
+### 28 · The design system  `09:01` · 24s · 52 words
 
 The design system is deliberately small: fifteen colour tokens, no hard-coded colours. Navy for authority. One amber for every accent, and small text stays ink because amber is too light to read. Outfit for words, DM Mono only for numbers, so prices and scores are easy to compare. Fewer decisions, more confidence.
 
-### 30 · Try it: the Research Hub, live  `09:41` · 48s · 82 words
+### 29 · Try it: the Research Hub, live  `09:25` · 48s · 82 words
 
 This is the heart of the product, and it's the real app, running right here. Five questions a buyer asks. "Is it good?" An evidence score and a summary written only from cited sources.
 
@@ -156,35 +152,35 @@ This is the heart of the product, and it's the real app, running right here. Fiv
 
 **[step]** And "What do owners say?" Verified owners, and a way to ask them questions.
 
-### 31 · Compare without crowning a winner  `10:29` · 34s · 63 words
+### 30 · Compare without crowning a winner  `10:13` · 34s · 63 words
 
 Compare is where my principles got tested. The rule: no winners. My first version starred the best in each row; I removed it. Now the strongest value gets a neutral mint pill. Your priorities float to the top. And the Decision check shows evidence coverage and open uncertainties, then lets you choose buy, wait or skip. Wait is a successful ending. Try it.
 
-### 32 · Things I only found by building it  `11:03` · 26s · 53 words
+### 31 · Things I only found by building it  `10:47` · 26s · 53 words
 
 Building it taught me things a mockup never would. Search should forgive typos. If we don't cover a product, say so. People lose their place, so the app tracks progress. A price drop should reopen your decision with a "what changed" note. And accessibility: focus, keyboard, forty-four pixel targets, from 320 pixels up.
 
-### 33 · How it makes money without selling trust  `11:29` · 24s · 53 words
+### 32 · How it makes money without selling trust  `11:13` · 24s · 53 words
 
 One last decision, a business one. If recommendations can be bought, the product dies. So revenue never changes what buyers see: no sponsored listings, no paid rankings. I removed them from my canvas because my own research says buyers distrust paid placement. Revenue: disclosed affiliate commissions, a premium tier, later anonymised insight reports.
 
 ## Test
 
-### 34 · Test  `11:53` · 3s · 3 words
+### 33 · Test  `11:37` · 3s · 3 words
 
 Stage five. Test.
 
-### 35 · How I’ll find out if I’m wrong  `11:56` · 25s · 60 words
+### 34 · How I’ll find out if I’m wrong  `11:40` · 25s · 60 words
 
 This is design validation, and I've been careful. Every key assumption has a method and a pass mark. Buyers spend many hours on one purchase: confirmed if four of six report five-plus hours. Showing sources raises trust: confirmed by an A/B test. Owners will contribute: confirmed if twenty percent start a review. Each can be proven wrong. That's the point.
 
-### 36 · Five tasks for the first test  `12:21` · 17s · 39 words
+### 35 · Five tasks for the first test  `12:05` · 17s · 39 words
 
 And a usability round: five tasks, five recent buyers, think-aloud. Judge a summary. Compare two products. Decide on timing. Set an alert in under a minute. Update an old review. I'll measure success, ease, trust, and SUS, targeting seventy-plus.
 
 ## Reflect
 
-### 37 · What I learned  `12:38` · 64s · 143 words
+### 36 · What I learned  `12:22` · 64s · 143 words
 
 Four things I'd actually carry into the next project. One: a broad topic isn't a research question. I started with "how people buy things" and got lost; research only became useful once I wrote a goal and specific questions.
 
@@ -194,11 +190,11 @@ Four things I'd actually carry into the next project. One: a broad topic isn't a
 
 **[step]** And four: working isn't the same as validated. A real prototype made it feel finished, but nobody except me has used it. So I wrote down how I'll find out.
 
-### 38 · If I did it again  `13:42` · 21s · 49 words
+### 37 · If I did it again  `13:26` · 21s · 49 words
 
 If I did it again: interviews before personas, test the decision check early, and confirm Nepali price data is accessible. Next in the app: warranty and seller type, because dealer versus grey import matters in Nepal, marking uncited sentences, real credited photos, and dark mode. But first, the interviews.
 
-### 39 · Thank you  `14:03` · 14s · 32 words
+### 38 · Thank you  `13:47` · 14s · 32 words
 
 TyoKina turns twenty open tabs into one evidence-backed decision, and it's honest about what it still needs to prove. Thank you. I'd love your questions, and your help finding people to interview.
 
