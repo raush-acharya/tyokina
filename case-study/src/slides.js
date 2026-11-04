@@ -98,7 +98,7 @@ export const slides = [
       </div>
       <div class="card card--amber" data-in style="display:grid;grid-template-columns:auto 1fr;gap:1.6rem;align-items:center">
         <span class="pill" style="border-color:var(--ink)">Being straight with you</span>
-        <p style="font-size:1.12rem;line-height:1.4">I haven’t run user interviews yet. My insights come from desk research and competitor analysis, and the personas are proto-personas built from those assumptions. Every assumption is tagged, and paired with a plan to test it.</p>
+        <p style="font-size:1.12rem;line-height:1.4">I haven’t run user interviews yet. My insights come from desk research and competitor analysis, and the personas are built from those assumptions. Every assumption is tagged, and paired with a plan to test it.</p>
       </div>
     </div>`,
   },
@@ -125,12 +125,12 @@ export const slides = [
   },
   {
     id: 'evidence', ch: 1, theme: 'paper', t: 30, title: 'What I did, and what I haven’t',
-    notes: `Here's what I actually did. Secondary research: articles, forum threads, how review sites work. A competitive analysis of four platform types. And six proto-personas, merged into three. What I haven't done is primary research. I wrote an eighteen-question interview guide, ready to run, but it hasn't been run. The question behind it all: why does buying research feel so exhausting?`,
+    notes: `Here's what I actually did. Secondary research: articles, forum threads, how review sites work. A competitive analysis of four platform types. And six personas, merged into three. What I haven't done is primary research. I wrote an eighteen-question interview guide, ready to run, but it hasn't been run. The question behind it all: why does buying research feel so exhausting?`,
     html: `
     <div class="wrap stack">
       <h2 class="h1" data-split>What I did, and what I haven’t<span class="accent">.</span></h2>
       <div class="grid g5" style="margin-top:1rem">
-        ${[['Done', 'Secondary research', 'Articles, community threads, review-site methods and AI shopping-agent news.'], ['Done', 'Competitive analysis', 'Four platform types, compared on 8 decision-support features.'], ['Done', 'Proto-personas', 'Six assumption-based personas, merged into three.'], ['Planned', 'Primary research', 'An 18-question, semi-structured interview guide, ready for 5–6 recent buyers.'], ['Planned', 'Usability testing', 'Five task-based sessions on the prototype.']]
+        ${[['Done', 'Secondary research', 'Articles, community threads, review-site methods and AI shopping-agent news.'], ['Done', 'Competitive analysis', 'Four platform types, compared on 8 decision-support features.'], ['Done', 'Personas', 'Six assumption-based personas, merged into three.'], ['Planned', 'Primary research', 'An 18-question, semi-structured interview guide, ready for 5–6 recent buyers.'], ['Planned', 'Usability testing', 'Five task-based sessions on the prototype.']]
           .map(([s, h, p]) => `<div class="card ${s === 'Planned' ? '' : 'card--solid'}" data-in style="${s === 'Planned' ? 'border-style:dashed' : ''}"><span class="pill ${s === 'Planned' ? 'pill--dash' : 'pill--teal'}">${s}</span><h3 class="h3" style="margin:.9rem 0 .5rem">${h}</h3><p class="small">${p}</p></div>`).join('')}
       </div>
       <div class="card card--navy" data-in style="margin-top:.6rem;display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:center">
@@ -200,11 +200,11 @@ export const slides = [
   },
   {
     id: 'personas', ch: 2, theme: 'ink', t: 42, steps: 2, title: 'Meet the three people I designed for',
-    notes: `I drafted six proto-personas, then merged them into three. Meet Ashna, the efficient shopper, who wants a genuine product at a fair price without losing her weekend. [step] Abesh, the evidence seeker: "show me the benchmarks". [step] And Krishna, the contributor, who shares honest reviews so others don't waste money. All three are assumptions I'd validate first.`,
+    notes: `I drafted six personas, then merged them into three. Meet Ashna, the efficient shopper, who wants a genuine product at a fair price without losing her weekend. [step] Abesh, the evidence seeker: "show me the benchmarks". [step] And Krishna, the contributor, who shares honest reviews so others don't waste money. All three are assumptions I'd validate first.`,
     html: `
     <div class="wrap stack">
       <div class="row" style="justify-content:space-between;align-items:flex-end"><h2 class="h1" data-split>Three people, three ways of buying<span class="accent">.</span></h2>
-        <button class="pill" data-zoom="figma/personas.png" data-alt="Proto-persona board" data-in style="cursor:zoom-in">See the persona board ↗</button></div>
+        <button class="pill" data-zoom="figma/personas.png" data-alt="Persona board" data-in style="cursor:zoom-in">See the persona board ↗</button></div>
       <div class="grid g3" style="margin-top:1rem">
         ${[['Ashna', 'The Efficient Shopper', '29 · Marketing manager · Kathmandu', '“I just want a genuine product at a fair price, without losing my weekend to research.”', 'A trustworthy summary in minutes, price history, and an alert when it’s a good time to buy.', 0],
            ['Abesh', 'The Evidence Seeker', '36 · IT consultant · Lalitpur', '“Skip the marketing pitch. Show me the benchmarks, and how it holds up after the warranty.”', 'Every claim linked to its source, benchmarks side by side, verified long-term owner reports.', 1],
@@ -213,7 +213,7 @@ export const slides = [
             <div class="row" style="align-items:center"><div class="avatar" style="${i === 2 ? 'background:var(--ink);color:var(--amber)' : ''}">${n[0]}</div><div><h3 class="h2">${n}</h3><p class="small">${role}</p></div></div>
             <p class="quote">${q}</p><p class="mono small">${meta}</p>
             <div><span class="tag">What TyoKina must do</span><p style="margin-top:.35rem;font-size:.98rem">${must}</p></div>
-            <span class="pill pill--dash">Proto-persona · assumption</span></div>`).join('')}
+            <span class="pill pill--dash">Persona · assumption</span></div>`).join('')}
       </div>
     </div>`,
   },

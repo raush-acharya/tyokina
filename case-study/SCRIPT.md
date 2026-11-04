@@ -34,7 +34,7 @@ Stage one. Empathize.
 
 ### 07 · What I did, and what I haven’t  `01:53` · 25s · 60 words
 
-Here's what I actually did. Secondary research: articles, forum threads, how review sites work. A competitive analysis of four platform types. And six proto-personas, merged into three. What I haven't done is primary research. I wrote an eighteen-question interview guide, ready to run, but it hasn't been run. The question behind it all: why does buying research feel so exhausting?
+Here's what I actually did. Secondary research: articles, forum threads, how review sites work. A competitive analysis of four platform types. And six personas, merged into three. What I haven't done is primary research. I wrote an eighteen-question interview guide, ready to run, but it hasn't been run. The question behind it all: why does buying research feel so exhausting?
 
 ### 08 · Everyone solves a slice of the problem  `02:18` · 21s · 50 words
 
@@ -60,7 +60,7 @@ I grouped the research into four themes: research fatigue, distrust of commercia
 
 ### 13 · Meet the three people I designed for  `03:41` · 28s · 55 words
 
-I drafted six proto-personas, then merged them into three. Meet Ashna, the efficient shopper, who wants a genuine product at a fair price without losing her weekend.
+I drafted six personas, then merged them into three. Meet Ashna, the efficient shopper, who wants a genuine product at a fair price without losing her weekend.
 
 **[step]** Abesh, the evidence seeker: "show me the benchmarks".
 
